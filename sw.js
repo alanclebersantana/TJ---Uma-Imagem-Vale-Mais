@@ -1,6 +1,6 @@
 /* Service worker simples: guarda o app para abrir offline.
    Troque a VERSAO sempre que atualizar o index.html. */
-const VERSAO = 'imagem-v3';
+const VERSAO = 'imagem-v5';
 const ARQUIVOS = ['./', './index.html', './manifest.json', './icone-192.png', './icone-512.png'];
 
 self.addEventListener('install', e => {

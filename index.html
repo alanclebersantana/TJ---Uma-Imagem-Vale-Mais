@@ -31,9 +31,15 @@
 }
 html.rosa{ --acento:#D8456F; --acento-claro:#FDECF1; --tinta:#241419; --cinza:#F5EDF0; --fundo:#FFFBFC; }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;padding:0}
+html,body{margin:0;padding:0;max-width:100%;overflow-x:hidden}
 body{background:var(--fundo);color:var(--tinta);font-family:var(--f);font-size:14px;line-height:1.5;
   -webkit-font-smoothing:antialiased;padding-bottom:calc(var(--nav) + 24px + env(safe-area-inset-bottom,0px))}
+/* nada pode esticar a página para o lado */
+.dado span,.dado b,.desc,.log,.log div,.progresso p,.cabeca p,.caixa .sub,.alerta p,.alerta b,
+.item b,.item span,.cartao h3,.cartao p,.peca .rot,.vazio p,.marca .nome b,h1,h2,b{
+  overflow-wrap:anywhere;word-break:break-word;hyphens:auto}
+.dados,.caixa,.alerta,.progresso,.linha-dado{max-width:100%;overflow:hidden}
+input,select,textarea{max-width:100%}
 img{display:block;max-width:100%}
 button{font-family:inherit;color:inherit;border:none;background:none;cursor:pointer;padding:0}
 input{font-family:inherit;font-size:16px;color:inherit}
@@ -155,6 +161,27 @@ input{font-family:inherit;font-size:16px;color:inherit}
 .btn-2.forte{background:var(--acento);color:#fff}
 .btn-2.risco{color:#A5432C}
 .acoes{display:flex;gap:9px;flex-wrap:wrap;padding:0 20px}
+.acoes .btn-2{flex:1 1 auto;min-width:0;white-space:nowrap}
+.dado b{flex:0 0 38%;min-width:0}
+.dado span{min-width:0}
+.autoria b,.autoria span{min-width:0}
+
+/* tela cheia */
+.telaCheia{position:fixed;inset:0;z-index:140;background:#100C09;display:none;flex-direction:column}
+.telaCheia.aberta{display:flex}
+.telaCheia .area{flex:1;overflow:auto;display:flex;align-items:center;justify-content:center;-webkit-overflow-scrolling:touch}
+.telaCheia img{max-width:100%;max-height:100%;object-fit:contain;transition:width .2s}
+.telaCheia.zoom .area{align-items:flex-start}
+.telaCheia.zoom img{max-width:none;max-height:none;width:260%}
+.telaCheia .topo-cheia{display:flex;align-items:center;gap:10px;padding:12px 14px;
+  padding-top:calc(12px + env(safe-area-inset-top,0px))}
+.telaCheia .redondo{width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.14);display:grid;place-items:center;flex:none}
+.telaCheia .redondo svg{width:18px;height:18px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.telaCheia .redondo.perigo{background:rgba(214,90,66,.28)}
+.telaCheia .legenda{color:#fff;font-size:12.5px;line-height:1.5;padding:12px 18px calc(20px + env(safe-area-inset-bottom,0px));
+  background:rgba(0,0,0,.35);max-height:32vh;overflow:auto}
+.telaCheia .legenda b{display:block;font-size:14px;font-weight:600;margin-bottom:4px}
+.telaCheia .legenda .dica{color:rgba(255,255,255,.45);font-size:11px;margin-top:8px}
 
 /* progresso */
 .progresso{margin:18px 20px 0;background:var(--branco);border-radius:16px;box-shadow:var(--sombra-2);padding:15px 17px}
@@ -187,8 +214,6 @@ input{font-family:inherit;font-size:16px;color:inherit}
 .autoria span{display:block;font-size:11px;color:var(--tinta-35)}
 .autoria .btn-2{margin-left:auto;flex:none}
 .desc{font-size:13.5px;color:var(--tinta-60);margin:14px 20px 0;line-height:1.65}
-.licao{margin:16px 20px 0;background:var(--acento-claro);border-radius:16px;padding:14px 16px;font-size:13.5px;line-height:1.55}
-.licao b{display:block;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--acento);margin-bottom:5px}
 .dados{margin:14px 20px 0;background:var(--branco);border-radius:16px;box-shadow:var(--sombra-2);padding:2px 16px}
 .dado{display:flex;gap:12px;padding:11px 0;font-size:12.5px;border-bottom:1px solid var(--linha)}
 .dado:last-child{border:none}
@@ -239,7 +264,7 @@ input{font-family:inherit;font-size:16px;color:inherit}
 
   <!-- BUSCA -->
   <section class="tela" id="tela-busca">
-    <div class="cabeca"><h1>Buscar imagem</h1><p>Descreva a cena, o objeto, o sentimento ou a lição</p></div>
+    <div class="cabeca"><h1>Buscar imagem</h1><p>Descreva a cena, o objeto ou o sentimento</p></div>
     <div style="padding:8px 20px 0">
       <label class="busca-pil">
         <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.6-3.6"/></svg>
@@ -329,6 +354,16 @@ input{font-family:inherit;font-size:16px;color:inherit}
 </nav>
 
 <div class="cortina" id="cortina"><div class="ficha" id="ficha"></div></div>
+<div class="telaCheia" id="telaCheia">
+  <div class="topo-cheia">
+    <button class="redondo" id="tc-fechar" aria-label="Fechar"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <button class="redondo" id="tc-zoom" aria-label="Aproximar"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.6-3.6M11 8v6M8 11h6"/></svg></button>
+    <button class="redondo" id="tc-fav" aria-label="Favoritar" style="margin-left:auto"><svg viewBox="0 0 24 24"><path d="M6 4h12a1 1 0 011 1v15l-7-4-7 4V5a1 1 0 011-1z"/></svg></button>
+    <button class="redondo perigo" id="tc-excluir" aria-label="Excluir"><svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"/></svg></button>
+  </div>
+  <div class="area" id="tc-area"></div>
+  <div class="legenda" id="tc-legenda"></div>
+</div>
 <div class="toast" id="toast"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -609,7 +644,7 @@ const PEDIDO = 'Você analisa imagens de publicações bíblicas para um banco d
 + 'Responda APENAS com um objeto JSON válido, sem markdown e sem comentários:\n'
 + '{"titulo":"3 a 6 palavras","descricao":"2 ou 3 frases sobre o que se vê","elementos":["objetos, roupas, animais, cenário"],'
 + '"pessoas":"quantidade, idade e o que fazem","cenario":"onde se passa","epoca":"tempos bíblicos, tempos modernos ou outro",'
-+ '"temas":["4 a 7 palavras-chave de assunto e sentimento"],"licao":"uma frase sobre a lição prática que a cena ensina",'
++ '"temas":["4 a 7 palavras-chave de assunto e sentimento"],'
 + '"texto":"texto legível na imagem, ou vazio","passagens":["relatos ou versículos que a cena pode ilustrar, se houver"]}\n'
 + 'Se for apenas ícone, logotipo, gráfico ou capa, diga isso no título e na descrição.';
 
@@ -751,7 +786,7 @@ function buscarLocal(q){
   return ITENS.map(i=>({i,p:pontuar(i,termos)})).filter(x=>x.p>0).sort((a,b)=>b.p-a.p).map(x=>x.i);
 }
 async function buscarComIA(q){
-  const resumo = ITENS.filter(i=>i.analisado).slice(0,300).map(i=>({id:i.id,t:i.titulo,k:(i.temas||[]).join(','),l:(i.licao||'').slice(0,90),d:(i.descricao||'').slice(0,120)}));
+  const resumo = ITENS.filter(i=>i.analisado).slice(0,300).map(i=>({id:i.id,t:i.titulo,k:(i.temas||[]).join(','),d:(i.descricao||'').slice(0,200)}));
   if(!resumo.length) return buscarLocal(q);
   const pedido = 'Catálogo de imagens (JSON):\n'+JSON.stringify(resumo)+'\n\nO usuário procura: "'+q+'"\n'+
     'Escolha as que realmente atendem ao pedido, considerando o sentido e não apenas palavras iguais. '+
@@ -774,7 +809,7 @@ function pecaHTML(it, i){
 function cartaoHTML(it){
   return '<button class="cartao" data-id="'+it.id+'">'
     + '<span class="foto"><img loading="lazy" src="'+it.img+'" alt="'+esc(it.titulo)+'"></span>'
-    + '<h3>'+esc(it.titulo)+'</h3><p>'+esc(it.analisado ? (it.licao||it.descricao) : 'Toque para descrever')+'</p></button>';
+    + '<h3>'+esc(it.titulo)+'</h3><p>'+esc(it.analisado ? it.descricao : 'Toque para descrever')+'</p></button>';
 }
 function temasMaisUsados(n){
   const c = new Map();
@@ -790,7 +825,7 @@ function renderGaleria(){
   const alvo = $('#corpo-galeria');
   if(!ITENS.length){
     alvo.innerHTML = '<div class="vazio"><h3>Comece pelo primeiro arquivo</h3>'
-      + '<p>Traga imagens, uma publicação ou uma página salva. Cada figura ganha título, descrição e a lição que ensina.</p></div>'
+      + '<p>Traga imagens, uma publicação ou uma página salva. Cada figura ganha título, descrição e assuntos, e fica pesquisável.</p></div>'
       + '<button class="btn" onclick="irPara(\'adicionar\')">Adicionar imagens</button>';
     return;
   }
@@ -931,27 +966,30 @@ function abrirDetalhe(id){
     .filter(p=>p[1] && String(p[1]).trim())
     .map(p=>'<div class="dado"><b>'+esc(p[0])+'</b><span>'+esc(p[1])+'</span></div>').join('');
 
-  $('#ficha').innerHTML = '<div class="capa"><img src="'+it.img+'" alt="'+esc(it.titulo)+'">'
+  $('#ficha').innerHTML = '<div class="capa"><img src="'+it.img+'" alt="'+esc(it.titulo)+'" id="f-imagem">'
     + '<button class="flutua voltar" id="f-voltar" aria-label="Voltar"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>'
     + '<button class="flutua marcar'+(it.fav?' on':'')+'" id="f-fav" aria-label="Favoritar"><svg viewBox="0 0 24 24"><path d="M6 4h12a1 1 0 011 1v15l-7-4-7 4V5a1 1 0 011-1z"/></svg></button></div>'
     + '<h2>'+esc(it.titulo)+'</h2>'
     + '<div class="autoria"><span class="mini"><img src="'+it.img+'" alt=""></span>'
-    + '<span><b>'+esc((it.origem||'Origem desconhecida').split(' › ')[0])+'</b><span>'+esc(it.epoca||'origem da imagem')+'</span></span>'
+    + '<span style="min-width:0"><b>'+esc((it.origem||'Origem desconhecida').split(' › ')[0])+'</b><span>'+esc(it.epoca||'origem da imagem')+'</span></span>'
     + '<button class="btn-2 forte" id="f-descrever">'+(it.analisado?'Descrever de novo':'Descrever')+'</button></div>'
     + '<p class="desc">'+(it.descricao?esc(it.descricao):'Esta imagem ainda não foi descrita.')+'</p>'
-    + (it.licao?'<div class="licao"><b>A lição</b>'+esc(it.licao)+'</div>':'')
     + (tags?'<div class="marcador">Assuntos</div><div class="pilhas">'+tags+'</div>':'')
     + (dados?'<div class="marcador">Detalhes</div><div class="dados">'+dados+'</div>':'')
     + '<div class="acoes" style="margin-top:18px">'
+    + '<button class="btn-2" id="f-cheia">Ver em tela cheia</button>'
     + '<button class="btn-2" id="f-copiar">Copiar descrição</button>'
-    + '<button class="btn-2" id="f-baixar">Baixar imagem</button>'
-    + '<button class="btn-2 risco" id="f-apagar">Remover</button></div>';
+    + '<button class="btn-2" id="f-baixar">Baixar imagem</button></div>'
+    + '<button class="btn" id="f-apagar" style="background:#A5432C">Excluir esta imagem</button>';
   $('#cortina').classList.add('aberta'); document.body.style.overflow='hidden';
+
+  $('#f-cheia').onclick = ()=>abrirTelaCheia(id);
+  $('#f-imagem').onclick = ()=>abrirTelaCheia(id);
 
   $('#f-voltar').onclick = fecharDetalhe;
   $('#f-fav').onclick = async ()=>{ it.fav=!it.fav; dirty.add(Math.floor(ITENS.indexOf(it)/TAM_LOTE)); await salvar(); renderTudo(); abrirDetalhe(id); };
   $('#f-copiar').onclick = ()=>{
-    const t = [it.titulo,it.descricao,it.licao?'Lição: '+it.licao:'',(it.temas||[]).join(', ')].filter(Boolean).join('\n');
+    const t = [it.titulo,it.descricao,(it.temas||[]).join(', ')].filter(Boolean).join('\n');
     navigator.clipboard.writeText(t).then(()=>toast('Copiado'),()=>toast('Não consegui copiar'));
   };
   $('#f-baixar').onclick = ()=>{
@@ -965,8 +1003,9 @@ function abrirDetalhe(id){
     catch(e){ toast('Falhou. Tente de novo.'); }
   };
   $('#f-apagar').onclick = async ()=>{
-    if(!confirm('Remover esta imagem?')) return;
-    ITENS = ITENS.filter(x=>x.id!==id); marcarTudoSujo(); await salvar(); fecharDetalhe(); renderTudo(); toast('Removida');
+    if(!confirm('Excluir esta imagem do banco?')) return;
+    ITENS = ITENS.filter(x=>x.id!==id); marcarTudoSujo(); await salvar();
+    fecharDetalhe(); renderTudo(); toast('Imagem excluída');
   };
 }
 function fecharDetalhe(){ $('#cortina').classList.remove('aberta'); document.body.style.overflow=''; }
@@ -990,6 +1029,80 @@ async function importar(file){
   }catch(e){ toast('Backup inválido'); }
 }
 
+/* ---------- tela cheia ---------- */
+let ID_CHEIA = null;
+function abrirTelaCheia(id){
+  const it = ITENS.find(i=>i.id===id); if(!it) return;
+  ID_CHEIA = id;
+  const tc = $('#telaCheia');
+  tc.classList.remove('zoom');
+  $('#tc-area').innerHTML = '<img src="'+it.img+'" alt="'+esc(it.titulo)+'">';
+  $('#tc-legenda').innerHTML = '<b>'+esc(it.titulo)+'</b>'
+    + esc(it.descricao || 'Esta imagem ainda não foi descrita.')
+    + '<div class="dica">Toque na imagem para aproximar · deslize para fechar</div>';
+  $('#tc-fav').style.opacity = it.fav ? '1' : '.55';
+  tc.classList.add('aberta');
+  document.body.style.overflow = 'hidden';
+}
+function fecharTelaCheia(){
+  $('#telaCheia').classList.remove('aberta');
+  ID_CHEIA = null;
+  if(!$('#cortina').classList.contains('aberta')) document.body.style.overflow = '';
+}
+$('#tc-fechar').onclick = fecharTelaCheia;
+$('#tc-zoom').onclick = ()=>$('#telaCheia').classList.toggle('zoom');
+$('#tc-area').addEventListener('click', ()=>$('#telaCheia').classList.toggle('zoom'));
+$('#tc-fav').onclick = async ()=>{
+  const it = ITENS.find(i=>i.id===ID_CHEIA); if(!it) return;
+  it.fav = !it.fav; dirty.add(Math.floor(ITENS.indexOf(it)/TAM_LOTE));
+  await salvar(); renderTudo();
+  $('#tc-fav').style.opacity = it.fav ? '1' : '.55';
+  toast(it.fav ? 'Guardada nas favoritas' : 'Saiu das favoritas');
+};
+$('#tc-excluir').onclick = async ()=>{
+  const it = ITENS.find(i=>i.id===ID_CHEIA); if(!it) return;
+  if(!confirm('Excluir esta imagem do banco?')) return;
+  ITENS = ITENS.filter(x=>x.id!==it.id); marcarTudoSujo(); await salvar();
+  fecharTelaCheia(); renderTudo(); toast('Imagem excluída');
+};
+/* deslizar para baixo fecha */
+(function(){
+  let y0 = null;
+  const tc = $('#telaCheia');
+  tc.addEventListener('touchstart', e=>{ y0 = e.touches[0].clientY; }, {passive:true});
+  tc.addEventListener('touchend', e=>{
+    if(y0 === null) return;
+    const dy = e.changedTouches[0].clientY - y0;
+    if(dy > 110 && !tc.classList.contains('zoom')) fecharTelaCheia();
+    y0 = null;
+  }, {passive:true});
+})();
+
+/* pressionar e segurar abre em tela cheia; toque simples abre a descrição */
+(function(){
+  let alvo = null, tempo = null, longo = false;
+  const inicio = e=>{
+    const el = e.target.closest('[data-id]');
+    if(!el || e.target.closest('.telaCheia')) return;
+    alvo = el.dataset.id; longo = false;
+    clearTimeout(tempo);
+    tempo = setTimeout(()=>{
+      longo = true;
+      if(navigator.vibrate) navigator.vibrate(12);
+      abrirTelaCheia(alvo);
+    }, 420);
+  };
+  const cancelar = ()=>{ clearTimeout(tempo); };
+  document.addEventListener('pointerdown', inicio);
+  document.addEventListener('pointerup', cancelar);
+  document.addEventListener('pointercancel', cancelar);
+  document.addEventListener('touchmove', cancelar, {passive:true});
+  document.addEventListener('scroll', cancelar, {passive:true});
+  document.addEventListener('click', e=>{
+    if(longo){ longo = false; e.stopPropagation(); e.preventDefault(); }
+  }, true);
+})();
+
 /* ---------- navegação ---------- */
 function irPara(t){
   VISTA = t;
@@ -1012,7 +1125,11 @@ document.addEventListener('click', e=>{
   if(c) abrirDetalhe(c.dataset.id);
 });
 $('#cortina').addEventListener('click', e=>{ if(e.target.id==='cortina') fecharDetalhe(); });
-document.addEventListener('keydown', e=>{ if(e.key==='Escape') fecharDetalhe(); });
+document.addEventListener('keydown', e=>{
+  if(e.key !== 'Escape') return;
+  if($('#telaCheia').classList.contains('aberta')) fecharTelaCheia();
+  else fecharDetalhe();
+});
 
 async function executarBusca(){
   const q = $('#input-busca').value.trim(), alvo = $('#resultado');
