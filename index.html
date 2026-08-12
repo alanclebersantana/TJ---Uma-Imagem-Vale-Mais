@@ -336,7 +336,8 @@ input{font-family:inherit;font-size:16px;color:inherit}
 const EXT_IMG = ['jpg','jpeg','png','webp','gif','bmp','avif','heic','heif'];
 let ITENS = [], VISTA = 'galeria', buscaIA = false, ABA = 'todas', CHAVE = '';
 let MOTOR = window.storage ? 'claude' : 'gemini';
-let MODELO = 'gemini-2.5-flash';
+let MODELO = 'gemini-flash-latest';
+let MODELOS = [];
 const dirty = new Set();
 
 const $ = s => document.querySelector(s);
@@ -617,26 +618,70 @@ function cabecalhos(){
   if(CHAVE){ h['x-api-key']=CHAVE; h['anthropic-version']='2023-06-01'; h['anthropic-dangerous-direct-browser-access']='true'; }
   return h;
 }
+function pontuaModelo(n){
+  if(/embedding|imagen|veo|tts|audio|live|image|robotics|learnlm|gemma/.test(n)) return -1;
+  let p = 0;
+  if(n.indexOf('flash') >= 0) p += 100;
+  if(n.indexOf('pro') >= 0) p += 60;
+  if(n.indexOf('lite') >= 0) p -= 12;
+  if(n.indexOf('preview') >= 0) p -= 25;
+  if(n.indexOf('exp') >= 0) p -= 30;
+  if(n.indexOf('latest') >= 0) p += 6;
+  const m = /(\d+)(?:\.(\d+))?/.exec(n);
+  if(m) p += parseInt(m[1],10)*8 + (m[2] ? parseInt(m[2],10) : 0);
+  return p;
+}
+async function listarModelos(){
+  if(!CHAVE) throw new Error('Cole a chave primeiro');
+  const r = await fetch('https://generativelanguage.googleapis.com/v1beta/models?pageSize=200',
+    { headers:{'x-goog-api-key': CHAVE} });
+  if(!r.ok){
+    let msg = 'Gemini ' + r.status;
+    try{ const e = await r.json(); if(e.error && e.error.message) msg += ': ' + e.error.message; }catch(x){}
+    throw new Error(msg);
+  }
+  const d = await r.json();
+  MODELOS = (d.models||[])
+    .filter(m => (m.supportedGenerationMethods||[]).indexOf('generateContent') >= 0)
+    .map(m => String(m.name||'').replace('models/',''))
+    .filter(n => pontuaModelo(n) > 0)
+    .sort((a,b) => pontuaModelo(b) - pontuaModelo(a));
+  if(!MODELOS.length) throw new Error('Nenhum modelo disponível para esta chave');
+  if(MODELOS.indexOf(MODELO) < 0){ MODELO = MODELOS[0]; await Guarda.gravar('banco:modelo', MODELO); }
+  return MODELOS;
+}
+async function chamarGemini(texto, b64, modelo){
+  const partes = [];
+  if(b64) partes.push({inline_data:{mime_type:'image/jpeg', data:b64}});
+  partes.push({text:texto});
+  const r = await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+modelo+':generateContent',{
+    method:'POST', headers:{'Content-Type':'application/json','x-goog-api-key':CHAVE},
+    body: JSON.stringify({contents:[{parts:partes}],
+      generationConfig:{temperature:0.2, maxOutputTokens:1400, responseMimeType:'application/json'}})
+  });
+  if(!r.ok){
+    let msg = 'Gemini ' + r.status;
+    try{ const e = await r.json(); if(e.error && e.error.message) msg += ': ' + e.error.message; }catch(x){}
+    const err = new Error(msg); err.codigo = r.status; throw err;
+  }
+  const d = await r.json();
+  const c = d.candidates && d.candidates[0];
+  if(!c || !c.content) throw new Error('Gemini não respondeu');
+  return (c.content.parts||[]).map(p=>p.text||'').join('');
+}
 async function pedirIA(texto, b64){
   if(MOTOR === 'gemini'){
     if(!CHAVE) throw new Error('Sem chave do Gemini');
-    const partes = [];
-    if(b64) partes.push({inline_data:{mime_type:'image/jpeg', data:b64}});
-    partes.push({text:texto});
-    const r = await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+MODELO+':generateContent?key='+encodeURIComponent(CHAVE),{
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({contents:[{parts:partes}],
-        generationConfig:{temperature:0.2, maxOutputTokens:1400, responseMimeType:'application/json'}})
-    });
-    if(!r.ok){
-      let msg = 'Gemini ' + r.status;
-      try{ const e = await r.json(); if(e.error && e.error.message) msg += ': ' + e.error.message; }catch(x){}
-      throw new Error(msg);
+    try{
+      return await chamarGemini(texto, b64, MODELO);
+    }catch(e){
+      if(e.codigo !== 404) throw e;
+      // o modelo saiu do ar: pergunta à chave quais existem e tenta o melhor
+      const lista = await listarModelos();
+      const novo = lista.find(n => n !== MODELO) || lista[0];
+      MODELO = novo; await Guarda.gravar('banco:modelo', MODELO);
+      return await chamarGemini(texto, b64, MODELO);
     }
-    const d = await r.json();
-    const c = d.candidates && d.candidates[0];
-    if(!c || !c.content) throw new Error('Gemini não respondeu');
-    return (c.content.parts||[]).map(p=>p.text||'').join('');
   }
   const partes = [];
   if(b64) partes.push({type:'image', source:{type:'base64', media_type:'image/jpeg', data:b64}});
@@ -663,11 +708,21 @@ async function analisarUma(item){
 async function analisarFila(lista){
   const fila = lista.filter(i=>!i.analisado), total = fila.length;
   if(!total) return;
-  let feitos=0, falhas=0;
+  if(MOTOR === 'gemini' && !CHAVE){
+    progresso('Falta a chave', 'Vá em Coleção › Quem descreve as imagens e cole a chave do Gemini.', 100);
+    return;
+  }
+  let feitos=0, falhas=0, ultimoErro='', parar=false;
+  const fatal = m => /Sem chave|401|403|API key|API_KEY|permission/i.test(m);
   const trabalhar = async ()=>{
-    while(fila.length){
+    while(fila.length && !parar){
       const it = fila.shift();
-      try{ await analisarUma(it); log('Descrita: '+it.titulo); }catch(e){ falhas++; log('Uma imagem falhou'); }
+      try{ await analisarUma(it); log('Descrita: '+it.titulo); }
+      catch(e){
+        falhas++; ultimoErro = String(e.message||e);
+        log('Falhou: ' + ultimoErro.slice(0,120));
+        if(fatal(ultimoErro)) parar = true;
+      }
       feitos++; dirty.add(Math.floor(ITENS.indexOf(it)/TAM_LOTE));
       progresso('Descrevendo', feitos+' de '+total+(falhas?' · '+falhas+' com erro':''), 65+(feitos/total)*35);
       if(feitos % 3 === 0) renderTudo();
@@ -675,7 +730,9 @@ async function analisarFila(lista){
   };
   await Promise.all([trabalhar(), trabalhar()]);
   renderTudo(); await salvar();
-  progresso('Pronto', feitos+' imagem(ns) descrita(s)'+(falhas?' · '+falhas+' para tentar de novo':''), 100);
+  if(parar) progresso('Parei por causa de um erro', ultimoErro.slice(0,160), 100);
+  else if(falhas) progresso('Terminado com falhas', (total-falhas)+' descritas · '+falhas+' com erro. Último: '+ultimoErro.slice(0,120), 100);
+  else progresso('Pronto', feitos+' imagem(ns) descrita(s)', 100);
   fecharProgresso();
 }
 
@@ -789,13 +846,14 @@ function renderColecao(){
     + (MOTOR==='gemini'
       ? '<span class="sub" style="display:block;margin-bottom:10px">Pegue uma chave grátis em aistudio.google.com/apikey. Ela fica salva só neste aparelho.</span>'
         + '<select id="c-modelo" style="width:100%;padding:11px 12px;border:1px solid var(--linha);border-radius:11px;background:var(--fundo);font-size:14px;margin-bottom:10px">'
-        + ['gemini-2.5-flash','gemini-2.5-flash-lite','gemini-2.0-flash'].map(m=>'<option value="'+m+'"'+(MODELO===m?' selected':'')+'>'+m+'</option>').join('')
+        + (MODELOS.length ? MODELOS : [MODELO]).map(m=>'<option value="'+esc(m)+'"'+(MODELO===m?' selected':'')+'>'+esc(m)+'</option>').join('')
         + '</select>'
       : '<span class="sub" style="display:block;margin-bottom:10px">Dentro do Claude não precisa de chave. Fora dele, cole uma chave da API da Anthropic.</span>')
-    + '<input id="c-chave" type="password" placeholder="'+(MOTOR==='gemini'?'AIza…':'sk-ant-…')+'" value="'+esc(CHAVE)+'" '
+    + '<input id="c-chave" type="password" placeholder="'+(MOTOR==='gemini'?'cole a chave aqui':'sk-ant-…')+'" value="'+esc(CHAVE)+'" '
     + 'style="width:100%;padding:12px 14px;border:1px solid var(--linha);border-radius:11px;background:var(--fundo);font-size:14px">'
     + '<div class="acoes" style="padding:12px 0 0">'
     + '<button class="btn-2 forte" id="c-salvar-chave">Salvar</button>'
+    + (MOTOR==='gemini' ? '<button class="btn-2" id="c-modelos">Buscar modelos</button>' : '')
     + '<button class="btn-2" id="c-testar">Testar</button></div></div>';
   h += '<div class="marcador">Manutenção</div><div class="acoes">'
     + '<button class="btn-2" id="c-exp">Exportar backup</button>'
@@ -812,15 +870,30 @@ function renderColecao(){
     CHAVE = $('#c-chave').value.trim();
     if($('#c-modelo')){ MODELO = $('#c-modelo').value; await Guarda.gravar('banco:modelo', MODELO); }
     await Guarda.gravar('banco:chave:'+MOTOR, CHAVE);
-    toast(CHAVE ? 'Chave salva' : 'Chave removida');
+    if(MOTOR === 'gemini' && CHAVE){
+      toast('Chave salva. Procurando modelos…');
+      try{ await listarModelos(); renderColecao(); toast('Pronto: usando ' + MODELO); }
+      catch(e){ toast(String(e.message||e).slice(0,90)); }
+    } else toast(CHAVE ? 'Chave salva' : 'Chave removida');
+  };
+  const bm = $('#c-modelos');
+  if(bm) bm.onclick = async ()=>{
+    CHAVE = $('#c-chave').value.trim();
+    toast('Consultando o Google…');
+    try{
+      await Guarda.gravar('banco:chave:'+MOTOR, CHAVE);
+      const l = await listarModelos();
+      renderColecao();
+      toast(l.length + ' modelos disponíveis');
+    }catch(e){ toast(String(e.message||e).slice(0,90)); }
   };
   const bt = $('#c-testar');
   if(bt) bt.onclick = async ()=>{
     CHAVE = $('#c-chave').value.trim();
     if($('#c-modelo')) MODELO = $('#c-modelo').value;
     toast('Testando…');
-    try{ await pedirIA('Responda apenas com o JSON {"ok":true}', null); toast('Funcionando'); }
-    catch(e){ toast(String(e.message||e).slice(0,90)); }
+    try{ await pedirIA('Responda apenas com o JSON {"ok":true}', null); renderColecao(); toast('Funcionando com ' + (MOTOR==='gemini'?MODELO:'Claude')); }
+    catch(e){ toast(String(e.message||e).slice(0,100)); }
   };
   $$('#colecao [data-motor]').forEach(b=>b.onclick = async ()=>{
     MOTOR = b.dataset.motor;
