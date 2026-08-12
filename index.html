@@ -1,0 +1,1067 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Uma imagem vale mais…</title>
+<meta name="description" content="Banco pessoal de imagens de publicações bíblicas, com descrição automática e busca por conteúdo.">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#B45B34">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="apple-touch-icon" href="icone-192.png">
+<link rel="icon" href="icone-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --branco:#FFFFFF;
+  --fundo:#FCFAF8;
+  --cinza:#F2EDE8;
+  --acento:#B45B34;
+  --acento-claro:#FBEDE6;
+  --tinta:#241A14;
+  --tinta-60:rgba(36,26,20,.60);
+  --tinta-35:rgba(36,26,20,.35);
+  --linha:rgba(36,26,20,.08);
+  --sombra:0 8px 28px rgba(36,26,20,.09);
+  --sombra-2:0 3px 14px rgba(36,26,20,.07);
+  --nav:66px;
+  --f:'Poppins',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+}
+html.rosa{ --acento:#D8456F; --acento-claro:#FDECF1; --tinta:#241419; --cinza:#F5EDF0; --fundo:#FFFBFC; }
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{background:var(--fundo);color:var(--tinta);font-family:var(--f);font-size:14px;line-height:1.5;
+  -webkit-font-smoothing:antialiased;padding-bottom:calc(var(--nav) + 24px + env(safe-area-inset-bottom,0px))}
+img{display:block;max-width:100%}
+button{font-family:inherit;color:inherit;border:none;background:none;cursor:pointer;padding:0}
+input{font-family:inherit;font-size:16px;color:inherit}
+::selection{background:var(--acento);color:#fff}
+:focus-visible{outline:2px solid var(--acento);outline-offset:2px;border-radius:8px}
+.wrap{max-width:900px;margin:0 auto}
+
+/* barra do topo */
+.barra{display:flex;align-items:center;gap:12px;padding:16px 20px 12px}
+.icone-btn{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;flex:none;background:var(--branco);box-shadow:var(--sombra-2)}
+.icone-btn svg{width:18px;height:18px;stroke:var(--tinta);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.busca-pil{flex:1;display:flex;align-items:center;gap:9px;background:var(--branco);border-radius:14px;
+  padding:10px 14px;box-shadow:var(--sombra-2);min-width:0}
+.busca-pil svg{width:16px;height:16px;stroke:var(--tinta-35);fill:none;stroke-width:2;flex:none}
+.busca-pil input{flex:1;border:none;background:none;outline:none;font-size:14px;min-width:0;padding:0}
+.busca-pil input::placeholder{color:var(--tinta-35)}
+.perfil{width:38px;height:38px;border-radius:50%;overflow:hidden;flex:none;background:var(--cinza);display:grid;place-items:center;box-shadow:var(--sombra-2)}
+.perfil img{width:100%;height:100%;object-fit:cover}
+.perfil span{font-size:13px;font-weight:600;color:var(--acento)}
+
+/* abas */
+.abas{display:flex;gap:22px;overflow-x:auto;padding:6px 20px 0;scrollbar-width:none}
+.abas::-webkit-scrollbar{display:none}
+.aba{font-size:13px;font-weight:500;color:var(--tinta-35);white-space:nowrap;padding-bottom:9px;position:relative}
+.aba.on{color:var(--tinta);font-weight:600}
+.aba.on::after{content:'';position:absolute;left:0;right:0;bottom:0;height:2px;background:var(--acento);border-radius:2px}
+
+/* título de seção */
+.sec{display:flex;align-items:baseline;padding:26px 20px 14px}
+.sec h2{font-size:17px;font-weight:600;margin:0}
+.sec .mais{margin-left:auto;font-size:12px;color:var(--acento);font-weight:500}
+
+/* mosaico */
+.mosaico{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 20px;grid-auto-rows:104px;grid-auto-flow:dense}
+.peca{position:relative;border-radius:16px;overflow:hidden;background:var(--cinza);box-shadow:var(--sombra-2);grid-row:span 2}
+.peca.alta{grid-row:span 3}
+.peca img{width:100%;height:100%;object-fit:cover}
+.peca .rot{position:absolute;left:0;right:0;bottom:0;padding:26px 12px 11px;
+  background:linear-gradient(to top,rgba(20,12,8,.78),rgba(20,12,8,0));color:#fff;
+  font-size:11.5px;font-weight:600;line-height:1.3;text-align:left;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.peca .selo{position:absolute;top:9px;right:9px;width:24px;height:24px;border-radius:50%;
+  background:rgba(255,255,255,.92);display:grid;place-items:center;font-size:11px;color:var(--acento)}
+.peca .aviso{position:absolute;top:9px;left:9px;background:rgba(255,255,255,.92);border-radius:6px;
+  padding:3px 7px;font-size:9px;font-weight:600;color:var(--tinta-60)}
+
+/* fileira */
+.trilho{display:flex;gap:13px;overflow-x:auto;padding:0 20px 6px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.trilho::-webkit-scrollbar{display:none}
+.cartao{flex:0 0 auto;width:132px;text-align:left}
+.cartao .foto{width:100%;aspect-ratio:1;border-radius:16px;overflow:hidden;background:var(--cinza);box-shadow:var(--sombra-2);position:relative}
+.cartao .foto img{width:100%;height:100%;object-fit:cover}
+.cartao h3{font-size:12.5px;font-weight:600;margin:9px 0 2px;line-height:1.3;
+  display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+.cartao p{font-size:10.5px;color:var(--tinta-35);margin:0;line-height:1.35;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+
+/* lista de origens */
+.lista{padding:0 20px}
+.item{display:flex;align-items:center;gap:13px;padding:11px 0;border-bottom:1px solid var(--linha);width:100%;text-align:left}
+.item:last-child{border:none}
+.item .mini{width:46px;height:46px;border-radius:14px;overflow:hidden;background:var(--cinza);flex:none}
+.item .mini img{width:100%;height:100%;object-fit:cover}
+.item b{display:block;font-size:13.5px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.item span{display:block;font-size:11.5px;color:var(--tinta-35)}
+.item .n{margin-left:auto;font-size:12px;font-weight:600;color:var(--acento);flex:none}
+
+/* telas internas */
+.tela{display:none;animation:aparece .28s ease both}
+.tela.ativa{display:block}
+@keyframes aparece{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.cabeca{padding:18px 20px 8px}
+.cabeca h1{font-size:24px;font-weight:600;margin:6px 0 0}
+.cabeca p{font-size:13px;color:var(--tinta-35);margin:6px 0 0}
+.marcador{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--tinta-35);font-weight:600;padding:24px 20px 12px}
+.pilhas{display:flex;gap:9px;flex-wrap:wrap;padding:0 20px}
+.pil{font-size:12.5px;font-weight:500;padding:8px 15px;border-radius:11px;background:var(--branco);
+  box-shadow:var(--sombra-2);color:var(--tinta-60)}
+.pil.on{background:var(--acento);color:#fff}
+.troca{display:flex;align-items:center;gap:10px;padding:16px 20px 0;font-size:12.5px;color:var(--tinta-60)}
+.switch{width:40px;height:23px;border-radius:999px;background:var(--cinza);position:relative;flex:none;transition:background .2s}
+.switch.on{background:var(--acento)}
+.switch::after{content:'';position:absolute;top:3px;left:3px;width:17px;height:17px;border-radius:50%;background:#fff;
+  transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.switch.on::after{transform:translateX(17px)}
+
+/* caixas */
+.caixa{background:var(--branco);border-radius:18px;box-shadow:var(--sombra-2);margin:12px 20px 0;padding:16px 18px}
+.caixa-topo{display:flex;align-items:flex-start;gap:13px}
+.caixa .ic{width:42px;height:42px;border-radius:13px;background:var(--acento-claro);display:grid;place-items:center;flex:none}
+.caixa .ic svg{width:19px;height:19px;stroke:var(--acento);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.caixa b{display:block;font-size:14px;font-weight:600}
+.caixa .sub{display:block;font-size:11.5px;color:var(--tinta-35);margin-top:2px}
+.caixa input[type=file]{display:block;width:100%;margin-top:14px;font-size:12.5px;color:var(--tinta-60)}
+.caixa input[type=file]::file-selector-button{font-family:var(--f);font-size:13px;font-weight:600;background:var(--acento);
+  color:#fff;border:none;border-radius:11px;padding:11px 20px;margin-right:12px;cursor:pointer}
+.colar{margin-top:14px;border:2px dashed var(--cinza);border-radius:14px;padding:20px 14px;text-align:center;
+  min-height:90px;outline:none;color:var(--tinta-35);font-size:12.5px}
+.colar:focus{border-color:var(--acento);color:var(--tinta-60)}
+.alerta{margin:12px 20px 0;background:var(--acento-claro);border-radius:16px;padding:15px 17px}
+.alerta b{display:block;font-size:13.5px;font-weight:600;margin-bottom:5px}
+.alerta p{margin:0;font-size:12px;color:var(--tinta-60);line-height:1.6}
+.ajustes{padding:14px 20px 0;display:flex;flex-direction:column;gap:13px;font-size:13px;color:var(--tinta-60)}
+.ajustes label{display:flex;align-items:center;gap:10px}
+.ajustes input[type=checkbox]{width:17px;height:17px;accent-color:var(--acento)}
+.ajustes input[type=number]{width:64px;padding:7px;border:1px solid var(--linha);border-radius:9px;background:var(--branco);font-size:14px}
+.dica{margin:16px 20px 0;font-size:11.5px;color:var(--tinta-35);line-height:1.65}
+.linha-dado{display:flex;align-items:center;gap:12px;padding:13px 20px;border-bottom:1px solid var(--linha);font-size:13.5px}
+.linha-dado span{margin-left:auto;font-weight:600;color:var(--acento)}
+
+.btn{display:block;width:calc(100% - 40px);margin:22px 20px 0;background:var(--acento);color:#fff;border-radius:14px;
+  padding:15px;font-size:14.5px;font-weight:600;text-align:center;box-shadow:var(--sombra)}
+.btn-2{display:inline-flex;align-items:center;justify-content:center;background:var(--branco);color:var(--tinta);
+  border-radius:11px;padding:10px 16px;font-size:12.5px;font-weight:600;box-shadow:var(--sombra-2)}
+.btn-2.forte{background:var(--acento);color:#fff}
+.btn-2.risco{color:#A5432C}
+.acoes{display:flex;gap:9px;flex-wrap:wrap;padding:0 20px}
+
+/* progresso */
+.progresso{margin:18px 20px 0;background:var(--branco);border-radius:16px;box-shadow:var(--sombra-2);padding:15px 17px}
+.progresso h4{margin:0;font-size:13px;font-weight:600}
+.progresso p{margin:3px 0 11px;font-size:11.5px;color:var(--tinta-35)}
+.barra{height:5px;background:var(--cinza);border-radius:999px;overflow:hidden}
+.barra i{display:block;height:100%;background:var(--acento);width:0;transition:width .35s;border-radius:999px}
+.log{margin-top:11px;max-height:120px;overflow:auto;font-size:11px;color:var(--tinta-35);line-height:1.9}
+
+/* ficha */
+.cortina{position:fixed;inset:0;z-index:80;background:rgba(36,26,20,.5);display:none;justify-content:center;align-items:flex-end}
+.cortina.aberta{display:flex}
+.ficha{background:var(--fundo);width:100%;max-width:620px;max-height:96vh;overflow:auto;border-radius:22px 22px 0 0;
+  animation:sobe .28s ease both;padding-bottom:24px}
+@keyframes sobe{from{transform:translateY(28px)}to{transform:none}}
+.ficha .capa{position:relative}
+.ficha .capa img{width:100%;max-height:46vh;object-fit:cover;border-radius:22px 22px 0 0;background:#fff}
+.ficha .flutua{position:absolute;top:14px;display:grid;place-items:center;width:36px;height:36px;border-radius:50%;
+  background:rgba(255,255,255,.92);box-shadow:var(--sombra-2)}
+.ficha .flutua svg{width:17px;height:17px;stroke:var(--tinta);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.ficha .voltar{left:14px}
+.ficha .marcar{right:14px}
+.ficha .marcar.on{background:var(--acento)}
+.ficha .marcar.on svg{stroke:#fff;fill:#fff}
+.ficha h2{font-size:20px;font-weight:600;margin:18px 20px 0}
+.autoria{display:flex;align-items:center;gap:11px;margin:14px 20px 0}
+.autoria .mini{width:40px;height:40px;border-radius:12px;overflow:hidden;background:var(--cinza);flex:none}
+.autoria .mini img{width:100%;height:100%;object-fit:cover}
+.autoria b{display:block;font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.autoria span{display:block;font-size:11px;color:var(--tinta-35)}
+.autoria .btn-2{margin-left:auto;flex:none}
+.desc{font-size:13.5px;color:var(--tinta-60);margin:14px 20px 0;line-height:1.65}
+.licao{margin:16px 20px 0;background:var(--acento-claro);border-radius:16px;padding:14px 16px;font-size:13.5px;line-height:1.55}
+.licao b{display:block;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--acento);margin-bottom:5px}
+.dados{margin:14px 20px 0;background:var(--branco);border-radius:16px;box-shadow:var(--sombra-2);padding:2px 16px}
+.dado{display:flex;gap:12px;padding:11px 0;font-size:12.5px;border-bottom:1px solid var(--linha)}
+.dado:last-child{border:none}
+.dado b{font-weight:500;color:var(--tinta-35);flex:0 0 38%}
+.dado span{flex:1}
+
+/* nav */
+.nav{position:fixed;left:0;right:0;bottom:0;z-index:60;height:calc(var(--nav) + env(safe-area-inset-bottom,0px));
+  padding-bottom:env(safe-area-inset-bottom,0px);background:var(--branco);box-shadow:0 -5px 22px rgba(36,26,20,.07);
+  display:flex;align-items:center}
+.nav button{flex:1;height:100%;display:grid;place-items:center;color:var(--tinta-35)}
+.nav button svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.nav button.on{color:var(--acento)}
+.nav button.on svg{stroke-width:2.3}
+
+.vazio{text-align:center;padding:46px 30px}
+.vazio h3{font-size:17px;font-weight:600;margin:0 0 7px}
+.vazio p{font-size:12.5px;color:var(--tinta-35);margin:0 auto;max-width:300px}
+.toast{position:fixed;left:50%;bottom:calc(var(--nav) + 18px);transform:translate(-50%,14px);background:var(--tinta);
+  color:#fff;padding:11px 19px;border-radius:12px;font-size:12.5px;opacity:0;pointer-events:none;
+  transition:opacity .22s,transform .22s;z-index:120;max-width:88vw;text-align:center}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+.cores{display:flex;gap:10px;padding:0 20px}
+.cor{width:36px;height:36px;border-radius:50%;border:2px solid transparent;box-shadow:var(--sombra-2)}
+.cor.on{border-color:var(--tinta)}
+.oculto{display:none !important}
+@media (min-width:700px){
+  .mosaico{grid-template-columns:repeat(4,1fr)}
+  .cartao{width:158px}
+  .ficha{border-radius:22px;margin:auto}
+  .cortina{align-items:center;padding:24px}
+}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms !important;transition-duration:.01ms !important}}
+</style>
+
+<main class="wrap">
+
+  <!-- GALERIA -->
+  <section class="tela ativa" id="tela-galeria">
+    <div class="barra">
+      <button class="icone-btn" id="ir-adicionar" aria-label="Adicionar">
+        <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+      </button>
+      <label class="busca-pil">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.6-3.6"/></svg>
+        <input id="busca-topo" type="search" placeholder="Buscar imagem" autocomplete="off">
+      </label>
+      <button class="perfil" id="perfil"><span>❞</span></button>
+    </div>
+    <div class="abas" id="abas"></div>
+    <div id="corpo-galeria"></div>
+    <div style="height:24px"></div>
+  </section>
+
+  <!-- BUSCA -->
+  <section class="tela" id="tela-busca">
+    <div class="cabeca"><h1>Buscar imagem</h1><p>Descreva a cena, o objeto, o sentimento ou a lição</p></div>
+    <div style="padding:8px 20px 0">
+      <label class="busca-pil">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.6-3.6"/></svg>
+        <input id="input-busca" type="search" placeholder="pai conversando com o filho" autocomplete="off">
+      </label>
+    </div>
+    <div class="troca">
+      <button class="switch" id="switch-ia" role="switch" aria-checked="false" aria-label="Busca inteligente"></button>
+      <span>Busca inteligente — procura pelo sentido</span>
+    </div>
+    <div class="marcador">Assuntos</div>
+    <div class="pilhas" id="tags"></div>
+    <div id="resultado" style="margin-top:20px"></div>
+    <div style="height:24px"></div>
+  </section>
+
+  <!-- ADICIONAR -->
+  <section class="tela" id="tela-adicionar">
+    <div class="cabeca"><h1>Adicionar imagens</h1><p>Escolha de onde elas vêm</p></div>
+
+    <div class="alerta oculto" id="alerta-ambiente"></div>
+
+    <div class="caixa">
+      <div class="caixa-topo">
+        <span class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 16l5-5 4 4 3-3 5 5"/><circle cx="8.5" cy="9.5" r="1.2"/></svg></span>
+        <span><b>Fotos e imagens</b><span class="sub">Da galeria do celular ou do computador</span></span>
+      </div>
+      <input type="file" id="in-fotos" accept="image/*" multiple>
+    </div>
+
+    <div class="caixa">
+      <div class="caixa-topo">
+        <span class="ic"><svg viewBox="0 0 24 24"><path d="M13 3H6a1 1 0 00-1 1v16a1 1 0 001 1h12a1 1 0 001-1V9z"/><path d="M13 3v6h6"/></svg></span>
+        <span><b>Arquivos e publicações</b><span class="sub">HTML salvo, EPUB, ZIP, JWPUB, PDF</span></span>
+      </div>
+      <input type="file" id="in-arquivos" multiple>
+    </div>
+
+    <div class="caixa oculto" id="caixa-pasta">
+      <div class="caixa-topo">
+        <span class="ic"><svg viewBox="0 0 24 24"><path d="M3 7a1 1 0 011-1h5l2 2h9a1 1 0 011 1v9a1 1 0 01-1 1H4a1 1 0 01-1-1z"/></svg></span>
+        <span><b>Uma pasta inteira</b><span class="sub">Páginas salvas com a pasta “_files”</span></span>
+      </div>
+      <input type="file" id="in-pasta" multiple webkitdirectory directory>
+    </div>
+
+    <div class="caixa">
+      <div class="caixa-topo">
+        <span class="ic"><svg viewBox="0 0 24 24"><rect x="8" y="4" width="12" height="16" rx="2"/><path d="M16 4V3a1 1 0 00-1-1h-3a1 1 0 00-1 1v1M4 8v11a1 1 0 001 1h3"/></svg></span>
+        <span><b>Copie a imagem e cole aqui</b><span class="sub">Funciona mesmo com o seletor bloqueado</span></span>
+      </div>
+      <div class="colar" id="colar" contenteditable="true" role="textbox" aria-label="Cole a imagem aqui">Toque aqui e escolha Colar</div>
+      <button class="btn-2" id="btn-colar" style="margin-top:12px">Colar da área de transferência</button>
+    </div>
+
+    <div class="marcador">Ajustes</div>
+    <div class="ajustes">
+      <label><input type="checkbox" id="op-analisar" checked> Descrever com IA logo após extrair</label>
+      <label><input type="checkbox" id="op-dedup" checked> Ignorar imagens repetidas</label>
+      <label>Ignorar imagens menores que <input type="number" id="op-min" value="200" min="0" step="20"> px</label>
+    </div>
+    <p class="dica" id="dica"></p>
+
+    <div class="progresso oculto" id="progresso">
+      <h4 id="prog-titulo">Trabalhando</h4>
+      <p id="prog-sub">—</p>
+      <div class="barra"><i id="prog-barra"></i></div>
+      <div class="log" id="prog-log"></div>
+    </div>
+    <input type="file" id="in-backup" accept=".json,application/json" class="oculto">
+    <div style="height:24px"></div>
+  </section>
+
+  <!-- COLEÇÃO -->
+  <section class="tela" id="tela-colecao">
+    <div class="cabeca"><h1>Sua coleção</h1><p>O que já está guardado</p></div>
+    <div id="colecao"></div>
+    <div style="height:24px"></div>
+  </section>
+</main>
+
+<nav class="nav" id="nav">
+  <button data-tela="galeria" class="on" aria-label="Galeria"><svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v8a1 1 0 01-1 1H5a1 1 0 01-1-1z"/></svg></button>
+  <button data-tela="busca" aria-label="Buscar"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.6-3.6"/></svg></button>
+  <button data-tela="adicionar" aria-label="Adicionar"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg></button>
+  <button data-tela="colecao" aria-label="Coleção"><svg viewBox="0 0 24 24"><path d="M6 4h12a1 1 0 011 1v15l-7-4-7 4V5a1 1 0 011-1z"/></svg></button>
+</nav>
+
+<div class="cortina" id="cortina"><div class="ficha" id="ficha"></div></div>
+<div class="toast" id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script>
+const EXT_IMG = ['jpg','jpeg','png','webp','gif','bmp','avif','heic','heif'];
+let ITENS = [], VISTA = 'galeria', buscaIA = false, ABA = 'todas', CHAVE = '';
+let MOTOR = window.storage ? 'claude' : 'gemini';
+let MODELO = 'gemini-2.5-flash';
+const dirty = new Set();
+
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const semAcento = s => String(s == null ? '' : s).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+const ehCelular = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+function toast(m){ const t=$('#toast'); t.textContent=m; t.classList.add('on'); clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('on'),2800); }
+function log(m){ const l=$('#prog-log'); if(!l) return; const d=document.createElement('div'); d.textContent=m; l.prepend(d); }
+function progresso(t,s,p){ $('#progresso').classList.remove('oculto'); $('#prog-titulo').textContent=t; $('#prog-sub').textContent=s; $('#prog-barra').style.width=Math.max(0,Math.min(100,p))+'%'; }
+function fecharProgresso(){ setTimeout(()=>$('#progresso').classList.add('oculto'),6000); }
+
+/* ---------- armazenamento ---------- */
+const TAM_LOTE = 4;
+const IDB = (function(){
+  let db=null, falhou=false;
+  const abrir = () => new Promise(res=>{
+    if(db) return res(db);
+    if(falhou || typeof indexedDB === 'undefined') return res(null);
+    try{
+      const r = indexedDB.open('bancoImagens',1);
+      r.onupgradeneeded = ()=>{ try{ r.result.createObjectStore('kv'); }catch(e){} };
+      r.onsuccess = ()=>{ db=r.result; res(db); };
+      r.onerror = ()=>{ falhou=true; res(null); };
+    }catch(e){ falhou=true; res(null); }
+  });
+  const op = async (modo, fn) => {
+    const d = await abrir(); if(!d) return null;
+    return new Promise(res=>{
+      try{ const q = fn(d.transaction('kv',modo).objectStore('kv'));
+        q.onsuccess=()=>res(q.result===undefined?null:q.result); q.onerror=()=>res(null);
+      }catch(e){ res(null); }
+    });
+  };
+  return { disponivel: typeof indexedDB !== 'undefined',
+    get:k=>op('readonly',s=>s.get(k)), set:(k,v)=>op('readwrite',s=>s.put(v,k)), del:k=>op('readwrite',s=>s.delete(k)) };
+})();
+const Guarda = {
+  modo: window.storage ? 'claude' : (IDB.disponivel ? 'local' : 'nenhum'),
+  get ativo(){ return this.modo !== 'nenhum'; },
+  async ler(k){
+    if(this.modo==='claude'){ try{ const r = await window.storage.get(k,false); return r ? JSON.parse(r.value) : null; }catch(e){ return null; } }
+    if(this.modo==='local') return await IDB.get(k);
+    return null;
+  },
+  async gravar(k,v){
+    if(this.modo==='claude'){ try{ await window.storage.set(k, JSON.stringify(v), false); return true; }catch(e){ return false; } }
+    if(this.modo==='local') return (await IDB.set(k,v)) !== null;
+    return false;
+  },
+  async apagar(k){
+    if(this.modo==='claude'){ try{ await window.storage.delete(k,false); }catch(e){} }
+    else if(this.modo==='local') await IDB.del(k);
+  }
+};
+const metaDe = it => { const m = Object.assign({}, it); delete m.img; return m; };
+async function salvar(){
+  if(!Guarda.ativo) return;
+  const lotes = Math.ceil(ITENS.length/TAM_LOTE);
+  const ok = await Guarda.gravar('banco:indice',{v:1,lotes,itens:ITENS.map(metaDe)});
+  if(!ok){ toast('Não consegui guardar. Exporte um backup.'); return; }
+  for(const n of Array.from(dirty)){
+    if(n >= lotes){ await Guarda.apagar('banco:lote:'+n); continue; }
+    await Guarda.gravar('banco:lote:'+n, ITENS.slice(n*TAM_LOTE,(n+1)*TAM_LOTE).map(i=>({id:i.id,img:i.img})));
+  }
+  dirty.clear();
+}
+function marcarTudoSujo(){ for(let i=0;i<Math.ceil(ITENS.length/TAM_LOTE)+4;i++) dirty.add(i); }
+async function carregar(){
+  if(!Guarda.ativo) return;
+  if(await Guarda.ler('banco:tema') === 'rosa') document.documentElement.classList.add('rosa');
+  const mo = await Guarda.ler('banco:motor'); if(mo) MOTOR = mo;
+  const md = await Guarda.ler('banco:modelo'); if(md) MODELO = md;
+  const ch = await Guarda.ler('banco:chave:'+MOTOR); if(ch) CHAVE = ch;
+  const ind = await Guarda.ler('banco:indice');
+  if(!ind || !ind.itens) return;
+  ITENS = ind.itens.map(m=>Object.assign({},m,{img:null}));
+  for(let n=0;n<ind.lotes;n++){
+    const f = await Guarda.ler('banco:lote:'+n);
+    if(!f) continue;
+    const mapa = new Map(f.map(x=>[x.id,x.img]));
+    ITENS.forEach(it=>{ if(mapa.has(it.id)) it.img = mapa.get(it.id); });
+    if(n % 4 === 0) renderTudo();
+  }
+  ITENS = ITENS.filter(i=>i.img);
+  renderTudo();
+}
+
+/* ---------- imagens ---------- */
+const carregarImagem = src => new Promise((res,rej)=>{ const im=new Image(); im.onload=()=>res(im); im.onerror=()=>rej(0); im.src=src; });
+function paraJPEG(im,max,q){
+  const lw = im.naturalWidth||im.width, lh = im.naturalHeight||im.height;
+  const f = Math.min(1, max/Math.max(lw,lh));
+  const w = Math.max(1,Math.round(lw*f)), h = Math.max(1,Math.round(lh*f));
+  const c = document.createElement('canvas'); c.width=w; c.height=h;
+  const x = c.getContext('2d'); x.fillStyle='#fff'; x.fillRect(0,0,w,h); x.drawImage(im,0,0,w,h);
+  return c.toDataURL('image/jpeg',q);
+}
+function digital(im){
+  const c=document.createElement('canvas'); c.width=12; c.height=12;
+  const x=c.getContext('2d'); x.drawImage(im,0,0,12,12);
+  const d=x.getImageData(0,0,12,12).data, g=[];
+  for(let i=0;i<d.length;i+=4) g.push((d[i]*0.3+d[i+1]*0.59+d[i+2]*0.11)|0);
+  const m=g.reduce((a,b)=>a+b,0)/g.length;
+  return g.map(v=>v>m?'1':'0').join('');
+}
+function parecidas(a,b){
+  if(!a||!b||a.length!==b.length) return false;
+  let d=0; for(let i=0;i<a.length;i++) if(a[i]!==b[i]){ d++; if(d>6) return false; }
+  return true;
+}
+
+/* ---------- extração ---------- */
+const extensao = n => (n.split('.').pop()||'').toLowerCase();
+const lerTexto = f => new Promise(r=>{ const x=new FileReader(); x.onload=()=>r(x.result); x.readAsText(f); });
+const lerDataURL = f => new Promise((r,j)=>{ const x=new FileReader(); x.onload=()=>r(x.result); x.onerror=()=>j(0); x.readAsDataURL(f); });
+const ehImagem = f => (f.type && f.type.indexOf('image/')===0) || EXT_IMG.indexOf(extensao(f.name))>=0;
+
+async function extrairDeHTML(file, mapa){
+  const doc = new DOMParser().parseFromString(await lerTexto(file),'text/html');
+  const alvos = [];
+  doc.querySelectorAll('img').forEach(el=>{
+    let src = el.getAttribute('src')||el.getAttribute('data-src')||el.getAttribute('data-img-src')||'';
+    const ss = el.getAttribute('srcset')||el.getAttribute('data-srcset');
+    if(ss){ const c = ss.split(',').map(p=>p.trim().split(/\s+/)).filter(p=>p[0]); if(c.length) src = c[c.length-1][0]; }
+    if(src) alvos.push({src, legenda: el.getAttribute('alt')||''});
+  });
+  doc.querySelectorAll('source[srcset]').forEach(el=>{
+    const p = el.getAttribute('srcset').split(',')[0].trim().split(/\s+/)[0];
+    if(p) alvos.push({src:p, legenda:''});
+  });
+  doc.querySelectorAll('[style*="background-image"]').forEach(el=>{
+    const m = /url\((['"]?)(.*?)\1\)/i.exec(el.getAttribute('style')||'');
+    if(m && m[2]) alvos.push({src:m[2], legenda:''});
+  });
+  const out = [];
+  for(const a of alvos){
+    try{
+      if(a.src.indexOf('data:image')===0){ out.push({dataUrl:a.src, origem:file.name, legenda:a.legenda}); continue; }
+      const base = decodeURIComponent((a.src.split('?')[0].split('#')[0].split('/').pop()||'')).toLowerCase();
+      if(base && mapa.has(base)){ out.push({dataUrl: await lerDataURL(mapa.get(base)), origem:file.name, legenda:a.legenda}); continue; }
+      if(/^https?:/i.test(a.src)){
+        try{ const r = await fetch(a.src); if(r.ok) out.push({dataUrl: await lerDataURL(await r.blob()), origem:file.name, legenda:a.legenda}); }catch(e){}
+      }
+    }catch(e){}
+  }
+  return out;
+}
+async function extrairDeZip(file){
+  if(typeof JSZip === 'undefined'){ log('Leitor de ZIP não carregou'); return []; }
+  let zip; try{ zip = await JSZip.loadAsync(file); }catch(e){ return []; }
+  const nomes = Object.keys(zip.files).filter(n=>!zip.files[n].dir && EXT_IMG.indexOf(extensao(n))>=0);
+  const out = [];
+  for(const n of nomes){
+    try{ out.push({dataUrl: await lerDataURL(await zip.files[n].async('blob')), origem:file.name+' › '+n.split('/').pop(), legenda:''}); }catch(e){}
+  }
+  if(!out.length){
+    const dentro = Object.keys(zip.files).find(n=>/contents$/i.test(n));
+    if(dentro){ try{ return await extrairDeZip(new File([await zip.files[dentro].async('blob')], file.name)); }catch(e){} }
+  }
+  return out;
+}
+async function carregarPdfJs(){
+  if(window.pdfjsLib) return window.pdfjsLib;
+  await new Promise((res,rej)=>{ const s=document.createElement('script');
+    s.src='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js'; s.onload=res; s.onerror=rej; document.head.appendChild(s); });
+  window.pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  return window.pdfjsLib;
+}
+async function extrairDePDF(file){
+  const out = [];
+  try{
+    const lib = await carregarPdfJs();
+    const pdf = await lib.getDocument({data: await file.arrayBuffer()}).promise;
+    for(let p=1;p<=pdf.numPages;p++){
+      const page = await pdf.getPage(p); let achou = 0;
+      try{
+        const ops = await page.getOperatorList();
+        for(let i=0;i<ops.fnArray.length;i++){
+          if(ops.fnArray[i] !== lib.OPS.paintImageXObject) continue;
+          const obj = await new Promise(res=>{ try{ page.objs.get(ops.argsArray[i][0], res); }catch(e){ res(null); } });
+          if(!obj || !obj.width) continue;
+          const c = document.createElement('canvas'); c.width=obj.width; c.height=obj.height;
+          const x = c.getContext('2d');
+          if(obj.bitmap) x.drawImage(obj.bitmap,0,0);
+          else if(obj.data){
+            const dat = x.createImageData(obj.width,obj.height), s = obj.data;
+            if(s.length === obj.width*obj.height*3){ for(let j=0,k=0;j<s.length;j+=3,k+=4){ dat.data[k]=s[j];dat.data[k+1]=s[j+1];dat.data[k+2]=s[j+2];dat.data[k+3]=255; } }
+            else if(s.length === obj.width*obj.height*4) dat.data.set(s);
+            else continue;
+            x.putImageData(dat,0,0);
+          } else continue;
+          out.push({dataUrl:c.toDataURL('image/jpeg',0.9), origem:file.name+' › pág. '+p, legenda:''}); achou++;
+        }
+      }catch(e){}
+      if(!achou && pdf.numPages <= 40){
+        const vp = page.getViewport({scale:1.6});
+        const c = document.createElement('canvas'); c.width=vp.width; c.height=vp.height;
+        await page.render({canvasContext:c.getContext('2d'), viewport:vp}).promise;
+        out.push({dataUrl:c.toDataURL('image/jpeg',0.85), origem:file.name+' › pág. '+p, legenda:''});
+      }
+      progresso('Lendo PDF', file.name+' — página '+p+' de '+pdf.numPages, p/pdf.numPages*100);
+    }
+  }catch(e){ log('Não consegui abrir '+file.name); }
+  return out;
+}
+
+async function processarArquivos(lista){
+  const arquivos = Array.from(lista||[]);
+  if(!arquivos.length){ toast('Nenhum arquivo selecionado'); return; }
+  irPara('adicionar');
+  const mapa = new Map(); arquivos.forEach(f=>mapa.set(f.name.toLowerCase(), f));
+  const minPx = parseInt($('#op-min').value||'0',10);
+  const dedup = $('#op-dedup').checked, analisar = $('#op-analisar').checked;
+  $('#prog-log').innerHTML = '';
+  progresso('Abrindo', arquivos.length+' arquivo(s)', 2);
+
+  let brutas = [];
+  const soltas = arquivos.filter(ehImagem), pacotes = arquivos.filter(f=>!ehImagem(f));
+  for(let i=0;i<pacotes.length;i++){
+    const f = pacotes[i], ext = extensao(f.name);
+    progresso('Abrindo', f.name, (i/Math.max(1,pacotes.length))*30+3);
+    let r = [];
+    if(['html','htm','xhtml','mhtml'].indexOf(ext)>=0) r = await extrairDeHTML(f, mapa);
+    else if(['zip','epub','jwpub'].indexOf(ext)>=0) r = await extrairDeZip(f);
+    else if(ext==='pdf') r = await extrairDePDF(f);
+    else continue;
+    log(f.name+': '+(r.length ? r.length+' imagem(ns)' : 'nenhuma imagem'));
+    brutas = brutas.concat(r);
+  }
+  for(const f of soltas){ try{ brutas.push({dataUrl: await lerDataURL(f), origem:f.name, legenda:''}); }catch(e){ log('Não consegui ler '+f.name); } }
+
+  if(!brutas.length){
+    progresso('Nada encontrado','Se for uma página salva do site, inclua a pasta “_files” que veio com o .html.',100);
+    fecharProgresso(); return;
+  }
+  const novos = [];
+  for(let i=0;i<brutas.length;i++){
+    const b = brutas[i];
+    progresso('Preparando', (i+1)+' de '+brutas.length, 33+(i/brutas.length)*32);
+    try{
+      const im = await carregarImagem(b.dataUrl);
+      const w = im.naturalWidth, h = im.naturalHeight;
+      if(Math.max(w,h) < minPx) continue;
+      const hash = digital(im);
+      if(dedup && (ITENS.some(x=>parecidas(x.hash,hash)) || novos.some(x=>parecidas(x.hash,hash)))) continue;
+      novos.push({id:uid(), img:paraJPEG(im,900,0.82), hash, w, h,
+        titulo: b.legenda ? b.legenda.slice(0,60) : 'Sem descrição',
+        descricao:'', elementos:[], pessoas:'', cenario:'', epoca:'', temas:[], licao:'',
+        texto:'', passagens:[], origem:b.origem, data:Date.now(), fav:false, analisado:false});
+    }catch(e){}
+  }
+  if(!novos.length){ progresso('Tudo já estava aqui','As imagens eram repetidas ou menores que o limite.',100); fecharProgresso(); return; }
+
+  const ini = ITENS.length;
+  ITENS = ITENS.concat(novos);
+  for(let i=ini;i<ITENS.length;i++) dirty.add(Math.floor(i/TAM_LOTE));
+  renderTudo(); await salvar();
+  log(novos.length+' imagem(ns) guardada(s)');
+  if(analisar) await analisarFila(novos);
+  else { progresso('Pronto', novos.length+' imagem(ns) guardada(s)',100); fecharProgresso(); }
+}
+
+/* ---------- análise ---------- */
+const PEDIDO = 'Você analisa imagens de publicações bíblicas para um banco de imagens em português do Brasil.\n'
++ 'Descreva SOMENTE o que aparece na imagem, com precisão e sem inventar.\n'
++ 'Responda APENAS com um objeto JSON válido, sem markdown e sem comentários:\n'
++ '{"titulo":"3 a 6 palavras","descricao":"2 ou 3 frases sobre o que se vê","elementos":["objetos, roupas, animais, cenário"],'
++ '"pessoas":"quantidade, idade e o que fazem","cenario":"onde se passa","epoca":"tempos bíblicos, tempos modernos ou outro",'
++ '"temas":["4 a 7 palavras-chave de assunto e sentimento"],"licao":"uma frase sobre a lição prática que a cena ensina",'
++ '"texto":"texto legível na imagem, ou vazio","passagens":["relatos ou versículos que a cena pode ilustrar, se houver"]}\n'
++ 'Se for apenas ícone, logotipo, gráfico ou capa, diga isso no título e na descrição.';
+
+function cabecalhos(){
+  const h = {'Content-Type':'application/json'};
+  if(CHAVE){ h['x-api-key']=CHAVE; h['anthropic-version']='2023-06-01'; h['anthropic-dangerous-direct-browser-access']='true'; }
+  return h;
+}
+async function pedirIA(texto, b64){
+  if(MOTOR === 'gemini'){
+    if(!CHAVE) throw new Error('Sem chave do Gemini');
+    const partes = [];
+    if(b64) partes.push({inline_data:{mime_type:'image/jpeg', data:b64}});
+    partes.push({text:texto});
+    const r = await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+MODELO+':generateContent?key='+encodeURIComponent(CHAVE),{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({contents:[{parts:partes}],
+        generationConfig:{temperature:0.2, maxOutputTokens:1400, responseMimeType:'application/json'}})
+    });
+    if(!r.ok){
+      let msg = 'Gemini ' + r.status;
+      try{ const e = await r.json(); if(e.error && e.error.message) msg += ': ' + e.error.message; }catch(x){}
+      throw new Error(msg);
+    }
+    const d = await r.json();
+    const c = d.candidates && d.candidates[0];
+    if(!c || !c.content) throw new Error('Gemini não respondeu');
+    return (c.content.parts||[]).map(p=>p.text||'').join('');
+  }
+  const partes = [];
+  if(b64) partes.push({type:'image', source:{type:'base64', media_type:'image/jpeg', data:b64}});
+  partes.push({type:'text', text:texto});
+  const r = await fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST', headers:cabecalhos(),
+    body: JSON.stringify({model:'claude-sonnet-4-6', max_tokens:1000, messages:[{role:'user', content:partes}]})
+  });
+  if(!r.ok) throw new Error('Claude ' + r.status);
+  const d = await r.json();
+  return (d.content||[]).filter(x=>x.type==='text').map(x=>x.text).join('\n');
+}
+async function analisarUma(item){
+  const im = await carregarImagem(item.img);
+  const b64 = paraJPEG(im,640,0.75).split(',')[1];
+  const t = (await pedirIA(PEDIDO, b64)).replace(/```json|```/g,'').trim();
+  const j = JSON.parse(t.slice(t.indexOf('{'), t.lastIndexOf('}')+1));
+  Object.assign(item,{
+    titulo:j.titulo||item.titulo, descricao:j.descricao||'',
+    elementos:Array.isArray(j.elementos)?j.elementos:[], pessoas:j.pessoas||'', cenario:j.cenario||'', epoca:j.epoca||'',
+    temas:Array.isArray(j.temas)?j.temas.map(x=>String(x).toLowerCase().trim()):[],
+    licao:j.licao||'', texto:j.texto||'', passagens:Array.isArray(j.passagens)?j.passagens:[], analisado:true});
+}
+async function analisarFila(lista){
+  const fila = lista.filter(i=>!i.analisado), total = fila.length;
+  if(!total) return;
+  let feitos=0, falhas=0;
+  const trabalhar = async ()=>{
+    while(fila.length){
+      const it = fila.shift();
+      try{ await analisarUma(it); log('Descrita: '+it.titulo); }catch(e){ falhas++; log('Uma imagem falhou'); }
+      feitos++; dirty.add(Math.floor(ITENS.indexOf(it)/TAM_LOTE));
+      progresso('Descrevendo', feitos+' de '+total+(falhas?' · '+falhas+' com erro':''), 65+(feitos/total)*35);
+      if(feitos % 3 === 0) renderTudo();
+    }
+  };
+  await Promise.all([trabalhar(), trabalhar()]);
+  renderTudo(); await salvar();
+  progresso('Pronto', feitos+' imagem(ns) descrita(s)'+(falhas?' · '+falhas+' para tentar de novo':''), 100);
+  fecharProgresso();
+}
+
+/* ---------- busca ---------- */
+function pontuar(it, termos){
+  const campos = [[it.titulo,6],[(it.temas||[]).join(' '),5],[(it.elementos||[]).join(' '),4],[it.licao,3],
+    [it.descricao,3],[it.pessoas,2],[it.cenario,2],[it.epoca,1],[it.texto,2],[(it.passagens||[]).join(' '),2],[it.origem,1]]
+    .map(c=>[semAcento(c[0]), c[1]]);
+  let t=0;
+  for(const termo of termos) for(const c of campos) if(c[0].indexOf(termo)>=0) t += c[1];
+  return t;
+}
+function buscarLocal(q){
+  const termos = semAcento(q).split(/\s+/).filter(t=>t.length>2);
+  if(!termos.length) return [];
+  return ITENS.map(i=>({i,p:pontuar(i,termos)})).filter(x=>x.p>0).sort((a,b)=>b.p-a.p).map(x=>x.i);
+}
+async function buscarComIA(q){
+  const resumo = ITENS.filter(i=>i.analisado).slice(0,300).map(i=>({id:i.id,t:i.titulo,k:(i.temas||[]).join(','),l:(i.licao||'').slice(0,90),d:(i.descricao||'').slice(0,120)}));
+  if(!resumo.length) return buscarLocal(q);
+  const pedido = 'Catálogo de imagens (JSON):\n'+JSON.stringify(resumo)+'\n\nO usuário procura: "'+q+'"\n'+
+    'Escolha as que realmente atendem ao pedido, considerando o sentido e não apenas palavras iguais. '+
+    'Responda APENAS com um array JSON dos "id", do mais relevante ao menos, no máximo 24. Se nenhuma servir, responda [].';
+  const t = (await pedirIA(pedido, null)).replace(/```json|```/g,'').trim();
+  const ids = JSON.parse(t.slice(t.indexOf('['), t.lastIndexOf(']')+1));
+  const porId = new Map(ITENS.map(i=>[i.id,i]));
+  return ids.map(i=>porId.get(i)).filter(Boolean);
+}
+
+/* ---------- render ---------- */
+function pecaHTML(it, i){
+  const alta = (i % 5 === 0 || i % 5 === 3);
+  return '<button class="peca'+(alta?' alta':'')+'" data-id="'+it.id+'">'
+    + '<img loading="lazy" src="'+it.img+'" alt="'+esc(it.titulo)+'">'
+    + (it.fav?'<span class="selo">★</span>':'')
+    + (it.analisado?'':'<span class="aviso">sem descrição</span>')
+    + '<span class="rot">'+esc(it.titulo)+'</span></button>';
+}
+function cartaoHTML(it){
+  return '<button class="cartao" data-id="'+it.id+'">'
+    + '<span class="foto"><img loading="lazy" src="'+it.img+'" alt="'+esc(it.titulo)+'"></span>'
+    + '<h3>'+esc(it.titulo)+'</h3><p>'+esc(it.analisado ? (it.licao||it.descricao) : 'Toque para descrever')+'</p></button>';
+}
+function temasMaisUsados(n){
+  const c = new Map();
+  ITENS.forEach(i=>(i.temas||[]).forEach(t=>{ const k=String(t).trim(); if(k.length>2) c.set(k,(c.get(k)||0)+1); }));
+  return Array.from(c.entries()).sort((a,b)=>b[1]-a[1]).slice(0,n);
+}
+function renderAbas(){
+  const temas = temasMaisUsados(10);
+  $('#abas').innerHTML = ['<button class="aba'+(ABA==='todas'?' on':'')+'" data-aba="todas">Todas</button>']
+    .concat(temas.map(p=>'<button class="aba'+(ABA===p[0]?' on':'')+'" data-aba="'+esc(p[0])+'">'+esc(p[0])+'</button>')).join('');
+}
+function renderGaleria(){
+  const alvo = $('#corpo-galeria');
+  const cap = ITENS.filter(i=>i.analisado).slice(-1)[0] || ITENS[ITENS.length-1];
+  $('#perfil').innerHTML = cap ? '<img src="'+cap.img+'" alt="">' : '<span>❞</span>';
+  if(!ITENS.length){
+    alvo.innerHTML = '<div class="vazio"><h3>Comece pelo primeiro arquivo</h3>'
+      + '<p>Traga imagens, uma publicação ou uma página salva. Cada figura ganha título, descrição e a lição que ensina.</p></div>'
+      + '<button class="btn" onclick="irPara(\'adicionar\')">Adicionar imagens</button>';
+    return;
+  }
+  const filtradas = ABA === 'todas' ? ITENS : ITENS.filter(i=>(i.temas||[]).some(t=>semAcento(t)===semAcento(ABA)));
+  const mosaico = filtradas.slice().reverse().slice(0,30);
+  let h = '<div class="sec"><h2>'+(ABA==='todas'?'Seu acervo':esc(ABA.charAt(0).toUpperCase()+ABA.slice(1)))+'</h2>'
+    + '<span class="mais">'+filtradas.length+' imagens</span></div>'
+    + '<div class="mosaico">'+mosaico.map(pecaHTML).join('')+'</div>';
+
+  const favs = ITENS.filter(i=>i.fav).reverse();
+  if(favs.length) h += '<div class="sec"><h2>Favoritas</h2><span class="mais">'+favs.length+'</span></div>'
+    + '<div class="trilho">'+favs.map(cartaoHTML).join('')+'</div>';
+
+  const pend = ITENS.filter(i=>!i.analisado);
+  if(pend.length) h += '<div class="sec"><h2>Esperando descrição</h2><span class="mais">'+pend.length+'</span></div>'
+    + '<div class="trilho">'+pend.slice(0,15).map(cartaoHTML).join('')+'</div>';
+
+  const origens = new Map();
+  ITENS.forEach(i=>{ const o = (i.origem||'').split(' › ')[0] || 'Sem origem'; if(!origens.has(o)) origens.set(o,[]); origens.get(o).push(i); });
+  if(origens.size){
+    h += '<div class="sec"><h2>Publicações</h2></div><div class="lista">'
+      + Array.from(origens.entries()).sort((a,b)=>b[1].length-a[1].length).slice(0,10).map(p=>
+        '<button class="item" data-id="'+p[1][p[1].length-1].id+'"><span class="mini"><img src="'+p[1][0].img+'" alt=""></span>'
+        + '<span><b>'+esc(p[0])+'</b><span>'+p[1].filter(i=>i.analisado).length+' descritas</span></span>'
+        + '<span class="n">'+p[1].length+'</span></button>').join('') + '</div>';
+  }
+  alvo.innerHTML = h;
+}
+function renderTags(){
+  const t = temasMaisUsados(18);
+  $('#tags').innerHTML = t.length
+    ? t.map(p=>'<button class="pil" data-tema="'+esc(p[0])+'">'+esc(p[0])+'</button>').join('')
+    : '<span style="font-size:12.5px;color:var(--tinta-35)">Os assuntos aparecem assim que as primeiras imagens forem descritas.</span>';
+}
+function renderColecao(){
+  const favs = ITENS.filter(i=>i.fav), desc = ITENS.filter(i=>i.analisado).length;
+  const mb = Math.round(ITENS.reduce((s,i)=>s+(i.img?i.img.length:0),0)/1048576*10)/10;
+  const rosa = document.documentElement.classList.contains('rosa');
+  let h = '<div class="linha-dado">Imagens <span>'+ITENS.length+'</span></div>'
+    + '<div class="linha-dado">Com descrição <span>'+desc+'</span></div>'
+    + '<div class="linha-dado">Favoritas <span>'+favs.length+'</span></div>'
+    + '<div class="linha-dado">Assuntos <span>'+new Set(ITENS.reduce((a,i)=>a.concat(i.temas||[]),[])).size+'</span></div>'
+    + '<div class="linha-dado">Espaço usado <span>'+mb+' MB</span></div>'
+    + '<div class="marcador">Cor do app</div><div class="cores">'
+    + '<button class="cor '+(rosa?'':'on')+'" data-cor="marrom" style="background:#B45B34"></button>'
+    + '<button class="cor '+(rosa?'on':'')+'" data-cor="rosa" style="background:#D8456F"></button></div>';
+  h += '<div class="marcador">Quem descreve as imagens</div>'
+    + '<div class="caixa">'
+    + '<div class="pilhas" style="padding:0 0 12px">'
+    + '<button class="pil'+(MOTOR==='gemini'?' on':'')+'" data-motor="gemini">Google Gemini</button>'
+    + (window.storage ? '<button class="pil'+(MOTOR==='claude'?' on':'')+'" data-motor="claude">Claude</button>' : '')
+    + '</div>'
+    + (MOTOR==='gemini'
+      ? '<span class="sub" style="display:block;margin-bottom:10px">Pegue uma chave grátis em aistudio.google.com/apikey. Ela fica salva só neste aparelho.</span>'
+        + '<select id="c-modelo" style="width:100%;padding:11px 12px;border:1px solid var(--linha);border-radius:11px;background:var(--fundo);font-size:14px;margin-bottom:10px">'
+        + ['gemini-2.5-flash','gemini-2.5-flash-lite','gemini-2.0-flash'].map(m=>'<option value="'+m+'"'+(MODELO===m?' selected':'')+'>'+m+'</option>').join('')
+        + '</select>'
+      : '<span class="sub" style="display:block;margin-bottom:10px">Dentro do Claude não precisa de chave. Fora dele, cole uma chave da API da Anthropic.</span>')
+    + '<input id="c-chave" type="password" placeholder="'+(MOTOR==='gemini'?'AIza…':'sk-ant-…')+'" value="'+esc(CHAVE)+'" '
+    + 'style="width:100%;padding:12px 14px;border:1px solid var(--linha);border-radius:11px;background:var(--fundo);font-size:14px">'
+    + '<div class="acoes" style="padding:12px 0 0">'
+    + '<button class="btn-2 forte" id="c-salvar-chave">Salvar</button>'
+    + '<button class="btn-2" id="c-testar">Testar</button></div></div>';
+  h += '<div class="marcador">Manutenção</div><div class="acoes">'
+    + '<button class="btn-2" id="c-exp">Exportar backup</button>'
+    + '<button class="btn-2" id="c-imp">Importar backup</button>'
+    + '<button class="btn-2" id="c-pend">Descrever pendentes</button>'
+    + '<button class="btn-2 risco" id="c-limpar">Apagar tudo</button></div>';
+  h += favs.length
+    ? '<div class="sec"><h2>Favoritas</h2></div><div class="mosaico">'+favs.slice().reverse().map(pecaHTML).join('')+'</div>'
+    : '<div class="vazio"><h3>Nenhuma favorita</h3><p>Abra uma imagem e toque no marcador do canto para guardar.</p></div>';
+  $('#colecao').innerHTML = h;
+
+  const bc = $('#c-salvar-chave');
+  if(bc) bc.onclick = async ()=>{
+    CHAVE = $('#c-chave').value.trim();
+    if($('#c-modelo')){ MODELO = $('#c-modelo').value; await Guarda.gravar('banco:modelo', MODELO); }
+    await Guarda.gravar('banco:chave:'+MOTOR, CHAVE);
+    toast(CHAVE ? 'Chave salva' : 'Chave removida');
+  };
+  const bt = $('#c-testar');
+  if(bt) bt.onclick = async ()=>{
+    CHAVE = $('#c-chave').value.trim();
+    if($('#c-modelo')) MODELO = $('#c-modelo').value;
+    toast('Testando…');
+    try{ await pedirIA('Responda apenas com o JSON {"ok":true}', null); toast('Funcionando'); }
+    catch(e){ toast(String(e.message||e).slice(0,90)); }
+  };
+  $$('#colecao [data-motor]').forEach(b=>b.onclick = async ()=>{
+    MOTOR = b.dataset.motor;
+    await Guarda.gravar('banco:motor', MOTOR);
+    CHAVE = (await Guarda.ler('banco:chave:'+MOTOR)) || '';
+    renderColecao();
+  });
+  $('#c-exp').onclick = exportar;
+  $('#c-imp').onclick = ()=>$('#in-backup').click();
+  $('#c-pend').onclick = ()=>{ const p = ITENS.filter(i=>!i.analisado); if(!p.length) return toast('Todas já têm descrição'); irPara('adicionar'); analisarFila(p); };
+  $('#c-limpar').onclick = async ()=>{
+    if(!confirm('Isso apaga todas as imagens guardadas. Continuar?')) return;
+    const lotes = Math.ceil(ITENS.length/TAM_LOTE); ITENS = [];
+    if(Guarda.ativo){ for(let i=0;i<lotes;i++) await Guarda.apagar('banco:lote:'+i); await Guarda.gravar('banco:indice',{v:1,lotes:0,itens:[]}); }
+    renderTudo(); toast('Banco esvaziado');
+  };
+  $$('#colecao .cor').forEach(b=>b.onclick = async ()=>{
+    document.documentElement.classList.toggle('rosa', b.dataset.cor === 'rosa');
+    await Guarda.gravar('banco:tema', b.dataset.cor); renderColecao();
+  });
+}
+function renderTudo(){
+  if(VISTA==='galeria'){ renderAbas(); renderGaleria(); }
+  if(VISTA==='busca') renderTags();
+  if(VISTA==='colecao') renderColecao();
+}
+
+/* ---------- ficha ---------- */
+function abrirDetalhe(id){
+  const it = ITENS.find(i=>i.id===id); if(!it) return;
+  const tags = (it.temas||[]).map(t=>'<button class="pil" data-tema="'+esc(t)+'">'+esc(t)+'</button>').join(' ');
+  const dados = [['Quem aparece',it.pessoas],['Onde',it.cenario],['Época',it.epoca],['Texto na imagem',it.texto],
+    ['Relatos ligados',(it.passagens||[]).join(' · ')],['O que aparece',(it.elementos||[]).join(', ')],
+    ['Original',it.w+' × '+it.h+' px']]
+    .filter(p=>p[1] && String(p[1]).trim())
+    .map(p=>'<div class="dado"><b>'+esc(p[0])+'</b><span>'+esc(p[1])+'</span></div>').join('');
+
+  $('#ficha').innerHTML = '<div class="capa"><img src="'+it.img+'" alt="'+esc(it.titulo)+'">'
+    + '<button class="flutua voltar" id="f-voltar" aria-label="Voltar"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>'
+    + '<button class="flutua marcar'+(it.fav?' on':'')+'" id="f-fav" aria-label="Favoritar"><svg viewBox="0 0 24 24"><path d="M6 4h12a1 1 0 011 1v15l-7-4-7 4V5a1 1 0 011-1z"/></svg></button></div>'
+    + '<h2>'+esc(it.titulo)+'</h2>'
+    + '<div class="autoria"><span class="mini"><img src="'+it.img+'" alt=""></span>'
+    + '<span><b>'+esc((it.origem||'Origem desconhecida').split(' › ')[0])+'</b><span>'+esc(it.epoca||'origem da imagem')+'</span></span>'
+    + '<button class="btn-2 forte" id="f-descrever">'+(it.analisado?'Descrever de novo':'Descrever')+'</button></div>'
+    + '<p class="desc">'+(it.descricao?esc(it.descricao):'Esta imagem ainda não foi descrita.')+'</p>'
+    + (it.licao?'<div class="licao"><b>A lição</b>'+esc(it.licao)+'</div>':'')
+    + (tags?'<div class="marcador">Assuntos</div><div class="pilhas">'+tags+'</div>':'')
+    + (dados?'<div class="marcador">Detalhes</div><div class="dados">'+dados+'</div>':'')
+    + '<div class="acoes" style="margin-top:18px">'
+    + '<button class="btn-2" id="f-copiar">Copiar descrição</button>'
+    + '<button class="btn-2" id="f-baixar">Baixar imagem</button>'
+    + '<button class="btn-2 risco" id="f-apagar">Remover</button></div>';
+  $('#cortina').classList.add('aberta'); document.body.style.overflow='hidden';
+
+  $('#f-voltar').onclick = fecharDetalhe;
+  $('#f-fav').onclick = async ()=>{ it.fav=!it.fav; dirty.add(Math.floor(ITENS.indexOf(it)/TAM_LOTE)); await salvar(); renderTudo(); abrirDetalhe(id); };
+  $('#f-copiar').onclick = ()=>{
+    const t = [it.titulo,it.descricao,it.licao?'Lição: '+it.licao:'',(it.temas||[]).join(', ')].filter(Boolean).join('\n');
+    navigator.clipboard.writeText(t).then(()=>toast('Copiado'),()=>toast('Não consegui copiar'));
+  };
+  $('#f-baixar').onclick = ()=>{
+    const a = document.createElement('a'); a.href = it.img;
+    a.download = (semAcento(it.titulo).replace(/[^a-z0-9]+/g,'-').slice(0,40)||'imagem')+'.jpg';
+    document.body.appendChild(a); a.click(); a.remove();
+  };
+  $('#f-descrever').onclick = async ()=>{
+    toast('Descrevendo…');
+    try{ await analisarUma(it); dirty.add(Math.floor(ITENS.indexOf(it)/TAM_LOTE)); await salvar(); renderTudo(); abrirDetalhe(id); toast('Pronto'); }
+    catch(e){ toast('Falhou. Tente de novo.'); }
+  };
+  $('#f-apagar').onclick = async ()=>{
+    if(!confirm('Remover esta imagem?')) return;
+    ITENS = ITENS.filter(x=>x.id!==id); marcarTudoSujo(); await salvar(); fecharDetalhe(); renderTudo(); toast('Removida');
+  };
+}
+function fecharDetalhe(){ $('#cortina').classList.remove('aberta'); document.body.style.overflow=''; }
+
+/* ---------- backup ---------- */
+function exportar(){
+  const b = new Blob([JSON.stringify({v:1,data:Date.now(),itens:ITENS})],{type:'application/json'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(b);
+  a.download = 'banco-imagens-'+new Date().toISOString().slice(0,10)+'.json';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href),4000); toast('Backup salvo');
+}
+async function importar(file){
+  try{
+    const d = JSON.parse(await lerTexto(file));
+    if(!d.itens) throw 0;
+    const atuais = new Set(ITENS.map(i=>i.id));
+    const novos = d.itens.filter(i=>i.img && !atuais.has(i.id));
+    ITENS = ITENS.concat(novos); marcarTudoSujo(); await salvar(); renderTudo();
+    toast(novos.length+' imagem(ns) importada(s)');
+  }catch(e){ toast('Backup inválido'); }
+}
+
+/* ---------- navegação ---------- */
+function irPara(t){
+  VISTA = t;
+  $$('.tela').forEach(x=>x.classList.remove('ativa'));
+  $('#tela-'+t).classList.add('ativa');
+  $$('#nav button').forEach(b=>b.classList.toggle('on', b.dataset.tela===t));
+  window.scrollTo({top:0,behavior:'smooth'});
+  renderTudo();
+}
+window.irPara = irPara;
+$('#nav').addEventListener('click', e=>{ const b = e.target.closest('button[data-tela]'); if(b) irPara(b.dataset.tela); });
+$('#ir-adicionar').onclick = ()=>irPara('adicionar');
+$('#perfil').onclick = ()=>irPara('colecao');
+$('#abas').addEventListener('click', e=>{
+  const a = e.target.closest('[data-aba]'); if(!a) return;
+  ABA = a.dataset.aba; renderAbas(); renderGaleria();
+});
+document.addEventListener('click', e=>{
+  const t = e.target.closest('[data-tema]');
+  if(t){ fecharDetalhe(); irPara('busca'); $('#input-busca').value = t.dataset.tema; executarBusca(); return; }
+  const c = e.target.closest('[data-id]');
+  if(c) abrirDetalhe(c.dataset.id);
+});
+$('#cortina').addEventListener('click', e=>{ if(e.target.id==='cortina') fecharDetalhe(); });
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') fecharDetalhe(); });
+$('#busca-topo').addEventListener('keydown', e=>{
+  if(e.key==='Enter'){ e.target.blur(); irPara('busca'); $('#input-busca').value = e.target.value; executarBusca(); }
+});
+
+async function executarBusca(){
+  const q = $('#input-busca').value.trim(), alvo = $('#resultado');
+  if(!q){ alvo.innerHTML=''; return; }
+  if(!ITENS.length){ alvo.innerHTML='<div class="vazio"><h3>Banco vazio</h3><p>Adicione arquivos primeiro.</p></div>'; return; }
+  let lista = [];
+  if(buscaIA){
+    alvo.innerHTML = '<div class="vazio"><h3>Procurando…</h3><p>Lendo o catálogo para entender o pedido.</p></div>';
+    try{ lista = await buscarComIA(q); }catch(e){ lista = buscarLocal(q); toast('Usei a busca por palavras'); }
+  } else lista = buscarLocal(q);
+  alvo.innerHTML = lista.length
+    ? '<div class="sec"><h2>'+lista.length+' resultado'+(lista.length>1?'s':'')+'</h2></div><div class="mosaico">'+lista.map(pecaHTML).join('')+'</div>'
+    : '<div class="vazio"><h3>Nada com esse termo</h3><p>Descreva a cena de outro jeito, ou ligue a busca inteligente.</p></div>';
+}
+$('#input-busca').addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.target.blur(); executarBusca(); } });
+$('#input-busca').addEventListener('input', ()=>{ if(!buscaIA) executarBusca(); });
+$('#switch-ia').onclick = ()=>{
+  buscaIA = !buscaIA;
+  $('#switch-ia').classList.toggle('on', buscaIA);
+  $('#switch-ia').setAttribute('aria-checked', String(buscaIA));
+  if($('#input-busca').value.trim()) executarBusca();
+};
+
+/* ---------- entradas ---------- */
+['in-fotos','in-arquivos','in-pasta'].forEach(id=>{
+  $('#'+id).addEventListener('change', e=>{ const f=e.target.files; e.target.value=''; processarArquivos(f); });
+});
+$('#in-backup').addEventListener('change', e=>{ const f=e.target.files[0]; e.target.value=''; if(f) importar(f); });
+
+async function processarColagem(fonte){
+  const achados = [];
+  if(fonte && fonte.files) for(const f of Array.from(fonte.files)) if(ehImagem(f)) achados.push(f);
+  if(fonte && fonte.items && !achados.length){
+    for(const it of Array.from(fonte.items)){
+      if(it.kind === 'file'){ const f = it.getAsFile(); if(f && ehImagem(f)) achados.push(f); }
+    }
+  }
+  if(achados.length){ processarArquivos(achados); return true; }
+  return false;
+}
+const areaColar = $('#colar');
+areaColar.addEventListener('focus', ()=>{ if(areaColar.textContent.indexOf('Toque aqui')===0) areaColar.textContent=''; });
+areaColar.addEventListener('paste', async e=>{
+  if(await processarColagem(e.clipboardData)){ e.preventDefault(); areaColar.textContent=''; return; }
+  setTimeout(async ()=>{
+    const arqs = [];
+    for(const im of Array.from(areaColar.querySelectorAll('img'))){
+      try{
+        if(im.src.indexOf('data:image')===0 || im.src.indexOf('blob:')===0){
+          const b = await (await fetch(im.src)).blob();
+          arqs.push(new File([b],'colada.png',{type:b.type||'image/png'}));
+        }
+      }catch(err){}
+    }
+    areaColar.innerHTML='';
+    if(arqs.length) processarArquivos(arqs); else toast('Não veio imagem na colagem');
+  },120);
+});
+$('#btn-colar').onclick = async ()=>{
+  try{
+    if(!navigator.clipboard || !navigator.clipboard.read){ toast('Este navegador não deixa ler a área de transferência'); return; }
+    const arqs = [];
+    for(const it of await navigator.clipboard.read()){
+      const tipo = it.types.find(t=>t.indexOf('image/')===0);
+      if(!tipo) continue;
+      arqs.push(new File([await it.getType(tipo)],'colada.png',{type:tipo}));
+    }
+    if(arqs.length) processarArquivos(arqs); else toast('Não há imagem copiada');
+  }catch(e){ toast('Permissão negada. Use o campo acima e toque em Colar.'); }
+};
+
+window.addEventListener('dragover', e=>e.preventDefault());
+window.addEventListener('drop', async e=>{
+  e.preventDefault();
+  const itens = e.dataTransfer && e.dataTransfer.items;
+  if(itens && itens.length && itens[0].webkitGetAsEntry){
+    const arquivos = [];
+    const ler = entry => new Promise(res=>{
+      if(!entry) return res();
+      if(entry.isFile) entry.file(f=>{ arquivos.push(f); res(); }, res);
+      else if(entry.isDirectory) entry.createReader().readEntries(async ents=>{ for(const en of ents) await ler(en); res(); }, res);
+      else res();
+    });
+    for(const r of Array.from(itens).map(i=>i.webkitGetAsEntry()).filter(Boolean)) await ler(r);
+    if(arquivos.length) return processarArquivos(arquivos);
+  }
+  if(e.dataTransfer && e.dataTransfer.files.length) processarArquivos(e.dataTransfer.files);
+});
+document.addEventListener('paste', e=>{
+  const f = e.clipboardData && e.clipboardData.files;
+  if(f && f.length) processarArquivos(f);
+});
+
+(function(){
+  if('webkitdirectory' in document.createElement('input') && !ehCelular) $('#caixa-pasta').classList.remove('oculto');
+  $('#dica').textContent = ehCelular
+    ? 'Para uma página salva do site, compacte a pasta em .zip e escolha o .zip: as imagens vêm todas juntas.'
+    : 'Para páginas salvas do site, use “Uma pasta inteira”. Também dá para arrastar arquivos para a tela ou colar com Ctrl+V.';
+  let dentroDeOutro = false;
+  try{ dentroDeOutro = window.self !== window.top; }catch(e){ dentroDeOutro = true; }
+  const prot = location.protocol, el = $('#alerta-ambiente');
+  if(prot === 'content:' || prot === 'file:' || prot === 'blob:'){
+    el.innerHTML = '<b>Este endereço bloqueia tudo</b><p>O navegador abriu o arquivo por “'+esc(prot)+'”, e nesse modo não libera seletor de arquivos, área de transferência nem memória. Publique como página (GitHub Pages) e abra pelo endereço https.</p>';
+    el.classList.remove('oculto');
+  } else if(dentroDeOutro){
+    el.innerHTML = '<b>Os botões não abrem nada?</b><p>Esta janela dentro do aplicativo bloqueia o seletor de arquivos do sistema. Use o campo de colar abaixo, ou publique o arquivo como página e abra no navegador.</p>';
+    el.classList.remove('oculto');
+  }
+})();
+
+if('serviceWorker' in navigator && location.protocol.indexOf('http') === 0){
+  window.addEventListener('load', ()=>{ navigator.serviceWorker.register('sw.js').catch(()=>{}); });
+}
+
+(async function(){ renderTudo(); await carregar(); renderTudo(); })();
+</script>
