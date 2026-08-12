@@ -41,18 +41,22 @@ input{font-family:inherit;font-size:16px;color:inherit}
 :focus-visible{outline:2px solid var(--acento);outline-offset:2px;border-radius:8px}
 .wrap{max-width:900px;margin:0 auto}
 
-/* barra do topo */
-.barra{display:flex;align-items:center;gap:12px;padding:16px 20px 12px}
-.icone-btn{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;flex:none;background:var(--branco);box-shadow:var(--sombra-2)}
-.icone-btn svg{width:18px;height:18px;stroke:var(--tinta);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+/* marca do topo */
+.marca{display:flex;align-items:center;gap:12px;padding:20px 20px 14px}
+.marca .simbolo{width:40px;height:40px;border-radius:13px;border:2px solid var(--acento);flex:none;
+  position:relative;overflow:hidden;background:var(--branco)}
+.marca .simbolo .morro{position:absolute;left:12%;right:-6%;bottom:0;height:52%;background:var(--acento);
+  clip-path:polygon(0% 100%, 42% 16%, 68% 62%, 84% 40%, 100% 100%)}
+.marca .simbolo .sol{position:absolute;right:16%;top:16%;width:26%;aspect-ratio:1;border-radius:50%;background:var(--acento);opacity:.55}
+.marca .nome{line-height:1}
+.marca .nome small{display:block;font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--tinta-35);font-weight:600;margin-bottom:3px}
+.marca .nome b{display:block;font-size:23px;font-weight:600;letter-spacing:-.02em}
 .busca-pil{flex:1;display:flex;align-items:center;gap:9px;background:var(--branco);border-radius:14px;
   padding:10px 14px;box-shadow:var(--sombra-2);min-width:0}
 .busca-pil svg{width:16px;height:16px;stroke:var(--tinta-35);fill:none;stroke-width:2;flex:none}
 .busca-pil input{flex:1;border:none;background:none;outline:none;font-size:14px;min-width:0;padding:0}
 .busca-pil input::placeholder{color:var(--tinta-35)}
-.perfil{width:38px;height:38px;border-radius:50%;overflow:hidden;flex:none;background:var(--cinza);display:grid;place-items:center;box-shadow:var(--sombra-2)}
-.perfil img{width:100%;height:100%;object-fit:cover}
-.perfil span{font-size:13px;font-weight:600;color:var(--acento)}
 
 /* abas */
 .abas{display:flex;gap:22px;overflow-x:auto;padding:6px 20px 0;scrollbar-width:none}
@@ -224,15 +228,9 @@ input{font-family:inherit;font-size:16px;color:inherit}
 
   <!-- GALERIA -->
   <section class="tela ativa" id="tela-galeria">
-    <div class="barra">
-      <button class="icone-btn" id="ir-adicionar" aria-label="Adicionar">
-        <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
-      </button>
-      <label class="busca-pil">
-        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.6-3.6"/></svg>
-        <input id="busca-topo" type="search" placeholder="Buscar imagem" autocomplete="off">
-      </label>
-      <button class="perfil" id="perfil"><span>❞</span></button>
+    <div class="marca">
+      <span class="simbolo" aria-hidden="true"><span class="sol"></span><span class="morro"></span></span>
+      <span class="nome"><small>Uma imagem</small><b>Vale mais</b></span>
     </div>
     <div class="abas" id="abas"></div>
     <div id="corpo-galeria"></div>
@@ -733,8 +731,6 @@ function renderAbas(){
 }
 function renderGaleria(){
   const alvo = $('#corpo-galeria');
-  const cap = ITENS.filter(i=>i.analisado).slice(-1)[0] || ITENS[ITENS.length-1];
-  $('#perfil').innerHTML = cap ? '<img src="'+cap.img+'" alt="">' : '<span>❞</span>';
   if(!ITENS.length){
     alvo.innerHTML = '<div class="vazio"><h3>Comece pelo primeiro arquivo</h3>'
       + '<p>Traga imagens, uma publicação ou uma página salva. Cada figura ganha título, descrição e a lição que ensina.</p></div>'
@@ -932,8 +928,6 @@ function irPara(t){
 }
 window.irPara = irPara;
 $('#nav').addEventListener('click', e=>{ const b = e.target.closest('button[data-tela]'); if(b) irPara(b.dataset.tela); });
-$('#ir-adicionar').onclick = ()=>irPara('adicionar');
-$('#perfil').onclick = ()=>irPara('colecao');
 $('#abas').addEventListener('click', e=>{
   const a = e.target.closest('[data-aba]'); if(!a) return;
   ABA = a.dataset.aba; renderAbas(); renderGaleria();
@@ -946,9 +940,6 @@ document.addEventListener('click', e=>{
 });
 $('#cortina').addEventListener('click', e=>{ if(e.target.id==='cortina') fecharDetalhe(); });
 document.addEventListener('keydown', e=>{ if(e.key==='Escape') fecharDetalhe(); });
-$('#busca-topo').addEventListener('keydown', e=>{
-  if(e.key==='Enter'){ e.target.blur(); irPara('busca'); $('#input-busca').value = e.target.value; executarBusca(); }
-});
 
 async function executarBusca(){
   const q = $('#input-busca').value.trim(), alvo = $('#resultado');
@@ -974,7 +965,11 @@ $('#switch-ia').onclick = ()=>{
 
 /* ---------- entradas ---------- */
 ['in-fotos','in-arquivos','in-pasta'].forEach(id=>{
-  $('#'+id).addEventListener('change', e=>{ const f=e.target.files; e.target.value=''; processarArquivos(f); });
+  $('#'+id).addEventListener('change', e=>{
+    const escolhidos = Array.from(e.target.files || []);   // copiar antes de limpar o campo
+    e.target.value = '';
+    processarArquivos(escolhidos);
+  });
 });
 $('#in-backup').addEventListener('change', e=>{ const f=e.target.files[0]; e.target.value=''; if(f) importar(f); });
 
