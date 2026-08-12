@@ -166,6 +166,15 @@ input{font-family:inherit;font-size:16px;color:inherit}
 .dado span{min-width:0}
 .autoria b,.autoria span{min-width:0}
 
+/* edição manual */
+.form{padding:0 20px}
+.form label{display:block;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--tinta-35);
+  font-weight:600;margin:18px 0 7px}
+.form input,.form textarea{width:100%;padding:12px 14px;border:1px solid var(--linha);border-radius:12px;
+  background:var(--branco);font-size:14px;font-family:var(--f);line-height:1.55;color:var(--tinta)}
+.form textarea{min-height:100px;resize:vertical}
+.form .ajuda{font-size:11.5px;color:var(--tinta-35);margin:7px 0 0;line-height:1.5}
+
 /* tela cheia */
 .telaCheia{position:fixed;inset:0;z-index:140;background:#100C09;display:none;flex-direction:column}
 .telaCheia.aberta{display:flex}
@@ -624,7 +633,7 @@ async function processarArquivos(lista){
       novos.push({id:uid(), img:paraJPEG(im,900,0.82), hash, w, h,
         titulo: b.legenda ? b.legenda.slice(0,60) : 'Sem descrição',
         descricao:'', elementos:[], pessoas:'', cenario:'', epoca:'', temas:[], licao:'',
-        texto:'', passagens:[], origem:b.origem, data:Date.now(), fav:false, analisado:false});
+        texto:'', passagens:[], nota:'', origem:b.origem, data:Date.now(), fav:false, analisado:false});
     }catch(e){}
   }
   if(!novos.length){ progresso('Tudo já estava aqui','As imagens eram repetidas ou menores que o limite.',100); fecharProgresso(); return; }
@@ -774,7 +783,7 @@ async function analisarFila(lista){
 /* ---------- busca ---------- */
 function pontuar(it, termos){
   const campos = [[it.titulo,6],[(it.temas||[]).join(' '),5],[(it.elementos||[]).join(' '),4],[it.licao,3],
-    [it.descricao,3],[it.pessoas,2],[it.cenario,2],[it.epoca,1],[it.texto,2],[(it.passagens||[]).join(' '),2],[it.origem,1]]
+    [it.descricao,3],[it.pessoas,2],[it.cenario,2],[it.epoca,1],[it.texto,2],[(it.passagens||[]).join(' '),2],[it.nota,6],[it.origem,1]]
     .map(c=>[semAcento(c[0]), c[1]]);
   let t=0;
   for(const termo of termos) for(const c of campos) if(c[0].indexOf(termo)>=0) t += c[1];
@@ -786,7 +795,7 @@ function buscarLocal(q){
   return ITENS.map(i=>({i,p:pontuar(i,termos)})).filter(x=>x.p>0).sort((a,b)=>b.p-a.p).map(x=>x.i);
 }
 async function buscarComIA(q){
-  const resumo = ITENS.filter(i=>i.analisado).slice(0,300).map(i=>({id:i.id,t:i.titulo,k:(i.temas||[]).join(','),d:(i.descricao||'').slice(0,200)}));
+  const resumo = ITENS.filter(i=>i.analisado).slice(0,300).map(i=>({id:i.id,t:i.titulo,k:(i.temas||[]).join(','),n:(i.nota||'').slice(0,120),d:(i.descricao||'').slice(0,200)}));
   if(!resumo.length) return buscarLocal(q);
   const pedido = 'Catálogo de imagens (JSON):\n'+JSON.stringify(resumo)+'\n\nO usuário procura: "'+q+'"\n'+
     'Escolha as que realmente atendem ao pedido, considerando o sentido e não apenas palavras iguais. '+
@@ -960,7 +969,7 @@ function renderTudo(){
 function abrirDetalhe(id){
   const it = ITENS.find(i=>i.id===id); if(!it) return;
   const tags = (it.temas||[]).map(t=>'<button class="pil" data-tema="'+esc(t)+'">'+esc(t)+'</button>').join(' ');
-  const dados = [['Quem aparece',it.pessoas],['Onde',it.cenario],['Época',it.epoca],['Texto na imagem',it.texto],
+  const dados = [['Suas observações',it.nota],['Quem aparece',it.pessoas],['Onde',it.cenario],['Época',it.epoca],['Texto na imagem',it.texto],
     ['Relatos ligados',(it.passagens||[]).join(' · ')],['O que aparece',(it.elementos||[]).join(', ')],
     ['Original',it.w+' × '+it.h+' px']]
     .filter(p=>p[1] && String(p[1]).trim())
@@ -977,12 +986,15 @@ function abrirDetalhe(id){
     + (tags?'<div class="marcador">Assuntos</div><div class="pilhas">'+tags+'</div>':'')
     + (dados?'<div class="marcador">Detalhes</div><div class="dados">'+dados+'</div>':'')
     + '<div class="acoes" style="margin-top:18px">'
+    + '<button class="btn-2 forte" id="f-editar">Editar</button>'
     + '<button class="btn-2" id="f-cheia">Ver em tela cheia</button>'
     + '<button class="btn-2" id="f-copiar">Copiar descrição</button>'
     + '<button class="btn-2" id="f-baixar">Baixar imagem</button></div>'
     + '<button class="btn" id="f-apagar" style="background:#A5432C">Excluir esta imagem</button>';
+  if(!$('#cortina').classList.contains('aberta')) empilhar('ficha');
   $('#cortina').classList.add('aberta'); document.body.style.overflow='hidden';
 
+  $('#f-editar').onclick = ()=>abrirEdicao(id);
   $('#f-cheia').onclick = ()=>abrirTelaCheia(id);
   $('#f-imagem').onclick = ()=>abrirTelaCheia(id);
 
@@ -1008,7 +1020,11 @@ function abrirDetalhe(id){
     fecharDetalhe(); renderTudo(); toast('Imagem excluída');
   };
 }
-function fecharDetalhe(){ $('#cortina').classList.remove('aberta'); document.body.style.overflow=''; }
+function fecharDetalhe(){
+  if(!$('#cortina').classList.contains('aberta')) return;
+  if(history.state && history.state.modal === 'ficha') history.back();
+  else fecharDetalheDireto();
+}
 
 /* ---------- backup ---------- */
 function exportar(){
@@ -1029,6 +1045,46 @@ async function importar(file){
   }catch(e){ toast('Backup inválido'); }
 }
 
+function abrirEdicao(id){
+  const it = ITENS.find(i=>i.id===id); if(!it) return;
+  $('#ficha').innerHTML = '<div class="capa"><img src="'+it.img+'" alt="">'
+    + '<button class="flutua voltar" id="e-voltar" aria-label="Voltar"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button></div>'
+    + '<h2>Editar</h2>'
+    + '<div class="form">'
+    + '<label for="e-titulo">Título</label>'
+    + '<input id="e-titulo" type="text" value="'+esc(it.titulo)+'">'
+    + '<label for="e-desc">Descrição</label>'
+    + '<textarea id="e-desc" placeholder="O que a imagem mostra">'+esc(it.descricao)+'</textarea>'
+    + '<label for="e-temas">Palavras-chave</label>'
+    + '<input id="e-temas" type="text" value="'+esc((it.temas||[]).join(', '))+'" placeholder="família, coragem, deserto">'
+    + '<p class="ajuda">Separe por vírgula. São elas que viram as abas da galeria e os atalhos da busca.</p>'
+    + '<label for="e-nota">Suas observações</label>'
+    + '<textarea id="e-nota" placeholder="Onde usar, com quem, o que lembrar">'+esc(it.nota||'')+'</textarea>'
+    + '<p class="ajuda">Só suas. A busca também procura aqui dentro.</p>'
+    + '<label for="e-elementos">O que aparece</label>'
+    + '<input id="e-elementos" type="text" value="'+esc((it.elementos||[]).join(', '))+'" placeholder="cajado, ovelhas, tenda">'
+    + '</div>'
+    + '<div class="acoes" style="margin-top:22px"><button class="btn-2" id="e-cancelar">Cancelar</button></div>'
+    + '<button class="btn" id="e-salvar">Salvar alterações</button>';
+  if(!$('#cortina').classList.contains('aberta')) empilhar('ficha');
+  $('#cortina').classList.add('aberta'); document.body.style.overflow='hidden';
+
+  const listar = v => v.split(',').map(x=>x.trim().toLowerCase()).filter(Boolean);
+  const voltar = ()=>abrirDetalhe(id);
+  $('#e-voltar').onclick = voltar;
+  $('#e-cancelar').onclick = voltar;
+  $('#e-salvar').onclick = async ()=>{
+    it.titulo = $('#e-titulo').value.trim() || it.titulo;
+    it.descricao = $('#e-desc').value.trim();
+    it.temas = listar($('#e-temas').value);
+    it.nota = $('#e-nota').value.trim();
+    it.elementos = listar($('#e-elementos').value);
+    it.analisado = true;
+    dirty.add(Math.floor(ITENS.indexOf(it)/TAM_LOTE));
+    await salvar(); renderTudo(); abrirDetalhe(id); toast('Alterações salvas');
+  };
+}
+
 /* ---------- tela cheia ---------- */
 let ID_CHEIA = null;
 function abrirTelaCheia(id){
@@ -1041,13 +1097,14 @@ function abrirTelaCheia(id){
     + esc(it.descricao || 'Esta imagem ainda não foi descrita.')
     + '<div class="dica">Toque na imagem para aproximar · deslize para fechar</div>';
   $('#tc-fav').style.opacity = it.fav ? '1' : '.55';
+  if(!tc.classList.contains('aberta')) empilhar('cheia');
   tc.classList.add('aberta');
   document.body.style.overflow = 'hidden';
 }
 function fecharTelaCheia(){
-  $('#telaCheia').classList.remove('aberta');
-  ID_CHEIA = null;
-  if(!$('#cortina').classList.contains('aberta')) document.body.style.overflow = '';
+  if(!$('#telaCheia').classList.contains('aberta')) return;
+  if(history.state && history.state.modal === 'cheia') history.back();
+  else fecharTelaCheiaDireto();
 }
 $('#tc-fechar').onclick = fecharTelaCheia;
 $('#tc-zoom').onclick = ()=>$('#telaCheia').classList.toggle('zoom');
@@ -1103,8 +1160,28 @@ $('#tc-excluir').onclick = async ()=>{
   }, true);
 })();
 
+/* ---------- botão e gesto de voltar ---------- */
+function empilhar(nome){ try{ history.pushState({modal:nome}, ''); }catch(e){} }
+function fecharTelaCheiaDireto(){
+  $('#telaCheia').classList.remove('aberta');
+  ID_CHEIA = null;
+  if(!$('#cortina').classList.contains('aberta')) document.body.style.overflow = '';
+}
+function fecharDetalheDireto(){
+  $('#cortina').classList.remove('aberta');
+  if(!$('#telaCheia').classList.contains('aberta')) document.body.style.overflow = '';
+}
+window.addEventListener('popstate', e=>{
+  const st = e.state || {};
+  if($('#telaCheia').classList.contains('aberta') && st.modal !== 'cheia'){ fecharTelaCheiaDireto(); return; }
+  if($('#cortina').classList.contains('aberta') && st.modal !== 'ficha'){ fecharDetalheDireto(); return; }
+  const t = st.tela || 'galeria';
+  if(t !== VISTA) irPara(t, true);
+});
+
 /* ---------- navegação ---------- */
-function irPara(t){
+function irPara(t, semHistorico){
+  if(!semHistorico && t !== VISTA){ try{ history.pushState({tela:t}, ''); }catch(e){} }
   VISTA = t;
   $$('.tela').forEach(x=>x.classList.remove('ativa'));
   $('#tela-'+t).classList.add('ativa');
@@ -1247,6 +1324,8 @@ document.addEventListener('paste', e=>{
 if('serviceWorker' in navigator && location.protocol.indexOf('http') === 0){
   window.addEventListener('load', ()=>{ navigator.serviceWorker.register('sw.js').catch(()=>{}); });
 }
+
+try{ history.replaceState({tela:'galeria'}, ''); }catch(e){}
 
 (async function(){ renderTudo(); await carregar(); renderTudo(); })();
 </script>
